@@ -24,13 +24,13 @@ After all PDFs are in place, run the OCR → semantic chunking → medical filte
 pipeline described in LONGTERM_CARE_EXPERT_DEV_PLAN.md.
 """
 
-import os
 import sys
 import time
 import hashlib
 import re
 import urllib.parse
 from pathlib import Path
+from typing import Optional
 
 try:
     import requests
@@ -200,7 +200,7 @@ def _get(url: str) -> requests.Response:
             time.sleep(RETRY_DELAY)
 
 
-def _extract_pdf_url_from_hpa_page(page_url: str) -> str | None:
+def _extract_pdf_url_from_hpa_page(page_url: str) -> Optional[str]:
     """
     Fetch an HPA web page and return the first .pdf download URL found.
 
@@ -244,18 +244,22 @@ def _extract_pdf_url_from_hpa_page(page_url: str) -> str | None:
             if "/File/" in val and ".pdf" in val.lower():
                 return val if val.startswith("http") else urllib.parse.urljoin(base, val)
 
-    # --- Strategy 4: search raw HTML text for .pdf paths --------------------
-    matches = re.findall(r'["\']([^"\']*\.pdf)["\']', resp.text, re.IGNORECASE)
+    # --- Strategy 4: search raw HTML for HPA-specific .pdf path patterns ----
+    # Restricts matches to HPA server paths (/File/, /Pages/, /common/) to avoid
+    # matching unrelated CSS or JavaScript asset references that end in .pdf.
+    # The first match is returned immediately — these strategies are ordered from
+    # most to least specific, so if we reach strategy 4 the first HPA-path match
+    # is the best available candidate.
+    matches = re.findall(
+        r'["\'](/(?:File|Pages|common)[^"\']*\.pdf)["\']', resp.text, re.IGNORECASE
+    )
     for match in matches:
-        if match.startswith("http"):
-            return match
-        if match.startswith("/"):
-            return urllib.parse.urljoin(base, match)
+        return urllib.parse.urljoin(base, match)
 
     return None
 
 
-def _extract_pdf_url_from_list_page(page_url: str, keyword: str = "") -> str | None:
+def _extract_pdf_url_from_list_page(page_url: str, keyword: str = "") -> Optional[str]:
     """
     For HPA List pages, find the most relevant PDF link.
     Optionally filter by a keyword in the link text.
@@ -405,6 +409,19 @@ def download_document(doc: dict) -> dict:
 
     # Write to disk
     dest.write_bytes(resp.content)
+
+    # Validate the downloaded file is actually a PDF (check %PDF magic bytes)
+    with open(dest, "rb") as f:
+        magic = f.read(8)
+    if not magic.startswith(b"%PDF"):
+        dest.unlink()
+        msg = (
+            f"Downloaded file does not appear to be a valid PDF "
+            f"(header: {magic!r}). The server may require a login or JavaScript."
+        )
+        print(f"  ✗  {msg}")
+        return {"name": name, "filename": filename, "status": "error", "message": msg}
+
     size_kb = len(resp.content) // 1024
     sha = _sha256(dest)
     print(f"  ✓  Saved {size_kb} KB  SHA-256: {sha[:16]}...")
