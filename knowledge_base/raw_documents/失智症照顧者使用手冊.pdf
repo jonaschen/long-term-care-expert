@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-Hant">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>找不到網頁</title>
+    <link href="https://www.taichung.gov.tw/styles/css/404.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+    </style>
+</head>
+<body>
+    <div class="missingPage">
+        <h1><a href="javascript:getDomain()" title="回網站首頁"><img src="https://www.taichung.gov.tw/mainData/images/h1.png" alt="臺中市政府" /></a></h1>
+        <div class="body">
+            <p>
+                <span>您瀏覽的網頁不存在，請點選<span lang="en">The page you're visiting does not exit, please click</span></span>
+                <a class="link" href="javascript:getDomain()" title="回到首頁, back home">首頁</a>
+                <span>回首頁<span lang="en">back to homepage.</span></span>
+            </p>
+
+            <div class="countdown">
+                <p id="page_div"></p>
+                <p id="en_page_div"></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    function getDomain() {
+        var hostname = location.hostname;
+        window.location.href = "http://" + hostname;
+    }
+
+    var num = 3; //倒計時的秒數
+    window.setTimeout("doUpdate()", 1000);
+    function doUpdate() {
+        if (num != 0) {
+            document.getElementById('page_div').innerHTML = '將在' + num + '秒後自動跳轉到首頁';
+            document.getElementById('en_page_div').innerHTML = ' be redirected to homepage automatically in' + num + 'seconds';
+
+            num--;
+            window.setTimeout("doUpdate()", 1000);
+        } else {
+            num = 3;
+            var hostname = location.hostname;
+            window.location.href = "http://" + hostname;
+        }
+    }
+</script>

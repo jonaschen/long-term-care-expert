@@ -6,7 +6,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **planning-phase project** for building `long-term-care-expert`, a hierarchical two-layer Claude Agent Skill Set for elderly home care monitoring in Taiwan. The full specification is in `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — read it completely before writing any code.
 
-**Current state:** No code exists yet. Only documentation and architectural specifications.
+**Current state:** Phase 1 in progress. Knowledge base stub documents and processed chunks exist. PDF downloads pending (see README.md TODO list). No skill or tool code written yet.
+
+## Knowledge Base — Current State
+
+`knowledge_base/raw_documents/` contains `.txt` stub files for most source documents and 2 KB PDF stubs that need to be replaced with real downloads (see README.md TODO list).
+
+`knowledge_base/processed_chunks/` contains 6 hand-written summary chunks covering all 5 RAG categories:
+
+| File | Category | Chunk ID |
+|---|---|---|
+| `fall_prevention_hpa.md` | fall_prevention | fall_prevention_001 |
+| `dementia_care_hpa.md` | dementia_care | dementia_care_001 |
+| `sleep_hygiene_hpa.md` | sleep_hygiene | sleep_hygiene_001 |
+| `chronic_disease_lifestyle_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_001 |
+| `active_living_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_002 |
+| `general_aging_hpa.md` | general_aging | general_aging_001 |
+
+These stubs pass the blacklisted-term compliance scan. Once real PDFs are downloaded, the full OCR → semantic chunking → medical filter pipeline needs to run to reach the ≥ 500 chunk target.
+
+**Compliance rules for knowledge base chunks:**
+- Every chunk must have metadata: `Category`, `Medical Content: false`, `Source`, `Audience`, `Update Date`, `Chunk ID`
+- Run blacklist scan before indexing: `grep -rni "sarcopenia|medication|sleeping pill|melatonin|diagnos|disorder|prescription|alzheimer|parkinson|BPSD|rehabilitation" knowledge_base/processed_chunks/`
+- `exclude_medical: true` must always be set when calling `search_hpa_guidelines`
 
 ## Planned Directory Structure
 
