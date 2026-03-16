@@ -1,59 +1,30 @@
-# AGENTS.md - Agent Hierarchy & Routing Logic
+# Long-Term Care Expert — Agent Routing Manifest
 
-This document defines the roles, responsibilities, and communication protocols for the hierarchical agent system within the `long-term-care-expert` skill set.
+## System Identity
+This Agent Skill Set is a privacy-first elderly home care behavioral insight system.
+It processes anonymized JSON behavioral event logs from edge IoT devices and
+produces warm, HPA-grounded health education insights for family caregivers via LINE.
 
-## 📐 Hierarchical Structure
+## Entry Point
+All incoming data enters through: skills/L1-ltc-insight-router/SKILL.md
 
-The system is organized into two distinct layers to separate data processing logic from domain-specific health education.
+## Skill Registry
+| Skill | Layer | Path | Activation |
+|---|---|---|---|
+| ltc-insight-router | L1 | skills/L1-ltc-insight-router/ | Always active — all data enters here |
+| sleep-pattern-expert | L2 | skills/L2-sleep-pattern-expert/ | Activated by L1 when sleep_issue detected |
+| mobility-fall-expert | L2 | skills/L2-mobility-fall-expert/ | Activated by L1 when mobility_issue or URGENT_FALL_RISK |
+| dementia-behavior-expert | L2 | skills/L2-dementia-behavior-expert/ | Activated by L1 when cognitive_issue detected |
+| chronic-disease-observer | L2 | skills/L2-chronic-disease-observer/ | Feeds weekly-summary-composer |
+| weekly-summary-composer | L2 | skills/L2-weekly-summary-composer/ | Fixed weekly cadence |
 
-### Layer 1: The Insight Router (`ltc-insight-router`)
+## Critical System Rules
+1. No L2 Skill ever produces direct text output — all output through generate_line_report
+2. search_hpa_guidelines must always be called with exclude_medical: true
+3. posture_change: sudden_drop bypasses all suppression — route immediately
+4. The 14-day silent learning period must complete before any report is sent to a new user
+5. The legal disclaimer is injected by the tool layer — agents must not attempt to modify it
 
-**Role:** The system's "Brain" and "Traffic Controller."
-- **Input:** 24-72 hour JSON behavioral log arrays and a 14-day personal baseline.
-- **Responsibility:**
-    - Perform baseline comparison for all incoming events.
-    - Execute **Alert Suppression Logic** (48h window) to prevent alert fatigue.
-    - Identify multi-day trends (except for urgent fall risks).
-    - Route validated trends to the appropriate L2 Expert(s).
-- **Constraint:** Does not possess health knowledge and never communicates directly with families.
-
-### Layer 2: Domain Experts
-
-**Role:** The system's "Voice" and "Educator."
-- **Common Workflow:** RAG Search (HPA Guidelines) → Synthesis (Data + Guide) → LINE Report.
-- **Constraint:** Must strictly follow Non-SaMD language patterns (observational, not diagnostic).
-
-| Agent ID | Domain | Trigger Examples |
-| :--- | :--- | :--- |
-| `sleep-pattern-expert` | Sleep/Nighttime | Bed exits ≥ 2, Tossing/turning > 30m |
-| `mobility-fall-expert` | Movement/Safety | Gait slowdown ≥ 30%, **Sudden drop (Urgent)** |
-| `dementia-behavior-expert` | Cognitive/Wandering | Nighttime wandering, Daytime inactivity |
-| `chronic-disease-observer` | Routine/Lifestyle | Activity trend shifts, appliance usage changes |
-| `weekly-summary-composer` | Cross-domain | Periodic 7-day behavioral synthesis |
-
-## 🚦 Routing & Escalation Logic
-
-### 1. Baseline Period
-- **14-Day Silent Period:** New devices are monitored without reporting to establish a personal "Normal" baseline.
-
-### 2. Trend Detection (L1)
-- **Isolated Events:** Suppressed and logged in hindsight notes.
-- **Trend Confirmed:** Anomaly recurs 2+ times within a 72-hour window.
-- **Urgent Bypass:** `posture_change: sudden_drop` (Potential Fall) triggers **immediate** L2 routing, bypassing all trend and suppression checks.
-
-### 3. Alert Suppression
-L1 calls `check_alert_history` before routing:
-- If a similar report was sent in the last 48 hours AND severity is stable → **Suppress**.
-- If severity has significantly worsened → **Route**.
-
-## 💬 Communication Protocol
-
-### Output Formatting
-All L2 agents must deliver output via the `generate_line_report` tool, which:
-1. Formats the data into a LINE Flex Message.
-2. Auto-injects the mandatory legal disclaimer.
-3. Ensures all language adheres to the de-medicalized whitelist.
-
-### Progressive Disclosure
-1. **Push:** Initial report provides one high-signal observation and one actionable suggestion.
-2. **Pull:** If the family replies, the agent retrieves deeper HPA guidance for the conversation.
+## Compliance Boundary
+See: COMPLIANCE.md
+Any output containing blacklisted terms is a regulatory violation.
