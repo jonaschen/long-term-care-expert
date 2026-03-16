@@ -6,22 +6,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **planning-phase project** for building `long-term-care-expert`, a hierarchical two-layer Claude Agent Skill Set for elderly home care monitoring in Taiwan. The full specification is in `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — read it completely before writing any code.
 
-**Current state:** Phase 1 in progress. Knowledge base stub documents and processed chunks exist. PDF downloads pending (see README.md TODO list). No skill or tool code written yet.
+**Current state:** Phase 1 in progress. Knowledge base stub documents and processed chunks exist. A download script (`scripts/download_hpa_docs.py`) is available to fetch the HPA PDFs — run it in an environment with internet access. PDF downloads pending for HPA EBook sources; AD-8 requires a one-time manual download. No skill or tool code written yet.
 
 ## Knowledge Base — Current State
 
-`knowledge_base/raw_documents/` contains `.txt` stub files for most source documents and 2 KB PDF stubs that need to be replaced with real downloads (see README.md TODO list).
+`knowledge_base/raw_documents/` contains `.txt` stub files for most source documents and 2 KB HTML stub files (mislabeled `.pdf`) that the download script will replace with real PDFs.
 
-`knowledge_base/processed_chunks/` contains 6 hand-written summary chunks covering all 5 RAG categories:
+`knowledge_base/processed_chunks/` contains 9 hand-written summary chunks covering all 5 RAG categories:
 
-| File | Category | Chunk ID |
-|---|---|---|
-| `fall_prevention_hpa.md` | fall_prevention | fall_prevention_001 |
-| `dementia_care_hpa.md` | dementia_care | dementia_care_001 |
-| `sleep_hygiene_hpa.md` | sleep_hygiene | sleep_hygiene_001 |
-| `chronic_disease_lifestyle_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_001 |
-| `active_living_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_002 |
-| `general_aging_hpa.md` | general_aging | general_aging_001 |
+| File | Category | Chunk ID | Notes |
+|---|---|---|---|
+| `fall_prevention_hpa.md` | fall_prevention | fall_prevention_001 | |
+| `dementia_care_hpa.md` | dementia_care | dementia_care_001 | Caregiver principles |
+| `dementia_ten_signs_hpa.md` | dementia_care | dementia_care_002 | 10 behavioral change signs |
+| `dementia_caregiver_resources_hpa.md` | dementia_care | dementia_care_003 | Community resources |
+| `ad8_observation_guide.md` | dementia_care | dementia_care_004 | ⚠ INTERNAL USE ONLY — never surface in family output |
+| `sleep_hygiene_hpa.md` | sleep_hygiene | sleep_hygiene_001 | |
+| `chronic_disease_lifestyle_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_001 | |
+| `active_living_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_002 | |
+| `general_aging_hpa.md` | general_aging | general_aging_001 | |
 
 These stubs pass the blacklisted-term compliance scan. Once real PDFs are downloaded, the full OCR → semantic chunking → medical filter pipeline needs to run to reach the ≥ 500 chunk target.
 
@@ -34,6 +37,9 @@ These stubs pass the blacklisted-term compliance scan. Once real PDFs are downlo
 
 ```
 long-term-care-expert/
+├── scripts/
+│   ├── download_hpa_docs.py   # Phase 1: download HPA source PDFs
+│   └── requirements.txt       # Python deps for scripts/
 ├── skills/
 │   ├── L1-ltc-insight-router/
 │   ├── L2-sleep-pattern-expert/

@@ -683,6 +683,10 @@ Example queries:
 }
 ```
 
+> **Implementation note for `hpa_rag_search.py`:** The vector store query **must** apply two hard filters before returning any results, regardless of caller parameters:
+> 1. `Medical Content: false` — exclude all medically flagged passages.
+> 2. `Internal Only: true` → **exclude** — chunks with this metadata field (currently only `dementia_care_004`, the AD-8 guide) must never be returned to any agent. They exist in the index solely for direct lookup by the `dementia-behavior-expert` internal reasoning step, not via RAG retrieval. If the index implementation does not support per-document exclusion filters, store these chunks in a separate, non-queryable partition.
+
 ### Tool 2: `generate_line_report`
 
 ```json
