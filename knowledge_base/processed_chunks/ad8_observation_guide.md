@@ -1,6 +1,7 @@
 # AD-8 Behavioral Observation Reference — Internal Reasoning Guide
 Category: dementia_care
 Medical Content: false
+Internal Only: true
 Source: AD-8 Early Detection Interview (Washington University / Knight ADRC) — Taiwan Version
 Audience: internal_reasoning_only
 Update Date: 2026-03-16

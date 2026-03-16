@@ -45,3 +45,4 @@ Families do not need to manage alone. Several resources exist:
   caregiver support groups.
 - **Day care centers** (日間照顧): Structured daytime activity programs that give elders
   a social environment while giving family caregivers rest.
+
