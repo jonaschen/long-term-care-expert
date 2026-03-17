@@ -14,8 +14,10 @@ Hierarchical two-layer AI Agent system designed for elderly home care monitoring
 
 ## Tech Stack
 - **AI Engine:** Claude Agent Skill Sets.
-- **Protocol:** Model Context Protocol (MCP).
-- **Knowledge Base:** Taiwan HPA Guidelines (RAG, Pillar 1) + Japan MHLW/JPHC (RAG, Pillar 2 — internal only).
+- **Protocol:** Model Context Protocol (MCP) via FastMCP.
+- **Vector Store:** Qdrant (embedded local mode) — two collections: `hpa_knowledge` (Pillar 1) and `japan_knowledge` (Pillar 2, Phase 5).
+- **Embedding Model:** BAAI/bge-m3 (local, multilingual Chinese + English, dense + sparse vectors for hybrid search).
+- **Knowledge Base:** Taiwan HPA Guidelines (RAG, Pillar 1, family-facing) + Japan MHLW/JPHC (RAG, Pillar 2, internal calibration only).
 - **Delivery:** LINE Official Account (Flex Messages).
 
 ## Getting Started

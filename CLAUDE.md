@@ -10,32 +10,79 @@ Two specification documents must be read before writing any code:
 - `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — core system architecture, all five L2 Skills, three MCP tools, SaMD compliance rules, Phases 1–4
 - `LONG_TERM_CARE_EXT_PLAN.md` — Japan calibration layer extension: new `east-asian-health-context-expert` Skill, `search_japan_clinical_data` tool, four Japanese RAG categories, enrichments to three existing Skills, Phases 5–6
 
-**Current state:** Phase 1 in progress. Source PDFs downloaded to `knowledge_base/raw_documents/`. `scripts/process_pdfs.py` uses gemini-cli to extract and chunk content from each PDF. No skill or tool code written yet.
+**Current state:** Phase 1 in progress. All 9 HPA/AD-8 source PDFs downloaded to `knowledge_base/raw_documents/`. `scripts/process_pdfs.py` uses gemini-cli to extract and chunk content — 18 initial chunks produced (one per document). Chunk expansion to ≥ 500 and vector index build are next. No skill or tool code written yet.
 
 ## Knowledge Base — Current State
 
-`knowledge_base/raw_documents/` contains `.txt` stub files for most source documents and 2 KB HTML stub files (mislabeled `.pdf`) that the download script will replace with real PDFs.
+`knowledge_base/raw_documents/` contains all 9 real PDFs (HPA handbooks + AD-8 scale).
 
-`knowledge_base/processed_chunks/` contains 9 hand-written summary chunks covering all 5 RAG categories:
+`knowledge_base/processed_chunks/` contains 18 compliant chunks — 9 hand-written stubs + 9 gemini-extracted (one per document). All pass the blacklist compliance scan. Chunk expansion to ≥ 500 is the next Phase 1 task.
 
 | File | Category | Chunk ID | Notes |
 |---|---|---|---|
-| `fall_prevention_hpa.md` | fall_prevention | fall_prevention_001 | |
-| `dementia_care_hpa.md` | dementia_care | dementia_care_001 | Caregiver principles |
-| `dementia_ten_signs_hpa.md` | dementia_care | dementia_care_002 | 10 behavioral change signs |
-| `dementia_caregiver_resources_hpa.md` | dementia_care | dementia_care_003 | Community resources |
-| `ad8_observation_guide.md` | dementia_care | dementia_care_004 | ⚠ INTERNAL USE ONLY — never surface in family output |
-| `sleep_hygiene_hpa.md` | sleep_hygiene | sleep_hygiene_001 | |
-| `chronic_disease_lifestyle_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_001 | |
-| `active_living_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_002 | |
-| `general_aging_hpa.md` | general_aging | general_aging_001 | |
-
-These stubs pass the blacklisted-term compliance scan. Once real PDFs are downloaded, the full OCR → semantic chunking → medical filter pipeline needs to run to reach the ≥ 500 chunk target.
+| `fall_prevention_hpa.md` | fall_prevention | fall_prevention_001 | Hand-written stub |
+| `fall_prevention_tips_hpa.md` | fall_prevention | fall_prevention_002 | Gemini-extracted |
+| `fall_prevention_professional_hpa.md` | fall_prevention | fall_prevention_003 | Gemini-extracted |
+| `dementia_care_hpa.md` | dementia_care | dementia_care_001 | Hand-written stub |
+| `dementia_ten_signs_hpa.md` | dementia_care | dementia_care_002 | Hand-written stub |
+| `dementia_caregiver_resources_hpa.md` | dementia_care | dementia_care_003 | Hand-written stub |
+| `ad8_observation_guide.md` | dementia_care | dementia_care_004 | ⚠ INTERNAL USE ONLY — hand-written stub |
+| `dementia_education_hpa.md` | dementia_care | dementia_care_005 | Gemini-extracted |
+| `dementia_ten_signs_full_hpa.md` | dementia_care | dementia_care_006 | Gemini-extracted |
+| `dementia_caregiver_handbook_hpa.md` | dementia_care | dementia_care_007 | Gemini-extracted |
+| `ad8_behavioral_domains_full.md` | dementia_care | dementia_care_008 | ⚠ INTERNAL USE ONLY — gemini-extracted |
+| `sleep_hygiene_hpa.md` | sleep_hygiene | sleep_hygiene_001 | Hand-written stub |
+| `sleep_hygiene_full_hpa.md` | sleep_hygiene | sleep_hygiene_002 | Gemini-extracted |
+| `chronic_disease_lifestyle_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_001 | Hand-written stub |
+| `active_living_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_002 | Hand-written stub |
+| `active_living_full_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_003 | Gemini-extracted |
+| `physical_activity_guidelines_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_004 | Gemini-extracted |
+| `general_aging_hpa.md` | general_aging | general_aging_001 | Hand-written stub |
 
 **Compliance rules for knowledge base chunks:**
 - Every chunk must have metadata: `Category`, `Medical Content: false`, `Source`, `Audience`, `Update Date`, `Chunk ID`
 - Run blacklist scan before indexing: `grep -rni "sarcopenia|medication|sleeping pill|melatonin|diagnos|disorder|prescription|alzheimer|parkinson|BPSD|rehabilitation" knowledge_base/processed_chunks/`
 - `exclude_medical: true` must always be set when calling `search_hpa_guidelines`
+
+## Vector Store & Embedding Stack
+
+**Decided:** Qdrant (local embedded) + BAAI/bge-m3.
+
+### Why Qdrant
+- **Two collections** map exactly to the two-pillar architecture: `hpa_knowledge` and `japan_knowledge`. The firewall between pillars is enforced at the collection level — `search_hpa_guidelines` only queries `hpa_knowledge`, `search_japan_clinical_data` only queries `japan_knowledge`.
+- **Payload filtering** handles all metadata requirements (`category`, `medical_content`, `audience`) natively, including the AD-8 isolation rule.
+- **Hybrid search** (dense vector + sparse BM25 in a single query) — critical for domain precision. For dementia care queries, exact terminology ("wandering," "appliance difficulty," "day-night reversal") must be matched reliably alongside semantic similarity. Pure vector search alone is insufficient.
+- **Named vectors** — allows adding a second embedding model later (e.g., a Chinese-specialized model) without rebuilding the index.
+- **Embedded mode** (no Docker required for development) — runs as a local file at `knowledge_base/vector_index/`. Can be upgraded to Qdrant Cloud later with no code changes.
+
+### Why BAAI/bge-m3
+- Designed for Chinese + English retrieval tasks — the source documents are Chinese (Traditional), the queries will be English.
+- Runs fully locally (privacy-first — no data sent to external APIs).
+- Natively supports both dense and sparse vectors, feeding Qdrant's hybrid search directly without a separate sparse encoder.
+
+### Collection Architecture
+
+```
+Qdrant (local file: knowledge_base/vector_index/)
+│
+├── Collection: hpa_knowledge
+│   ├── Payload fields: category, chunk_id, source, audience, medical_content, update_date
+│   ├── Query filter (always enforced): medical_content == false
+│   ├── Query filter (general RAG): audience != "internal_reasoning_only"
+│   └── Direct lookup (dementia-behavior-expert only): audience == "internal_reasoning_only"
+│       └── Contains: dementia_care_004, dementia_care_008 (AD-8 chunks — never in general RAG)
+│
+└── Collection: japan_knowledge  ← Phase 5
+    ├── Payload fields: category, source, population, outcome_type, taiwan_cultural_relevance, medical_content
+    └── Query filter (always enforced): medical_content == false, purpose field required
+```
+
+### New Scripts (Phase 1 completion)
+
+| Script | Purpose |
+|---|---|
+| `tools/embedding_pipeline.py` | Reads all chunks from `processed_chunks/`, embeds with bge-m3, indexes into Qdrant `hpa_knowledge` collection |
+| `tools/hpa_rag_search.py` | Implements `search_hpa_guidelines` MCP tool — hybrid search with payload filters |
 
 ## Two-Pillar Knowledge Architecture
 
@@ -71,11 +118,12 @@ long-term-care-expert/
 │   ├── L2-weekly-summary-composer/
 │   └── L2-east-asian-health-context/  # Extension Phase 6 — internal calibration only
 ├── tools/
+│   ├── embedding_pipeline.py  # Phase 1: embed chunks → Qdrant hpa_knowledge collection
 │   ├── mcp_server.py          # FastMCP server
-│   ├── hpa_rag_search.py
+│   ├── hpa_rag_search.py      # search_hpa_guidelines — hybrid search on hpa_knowledge
 │   ├── line_report_generator.py
 │   ├── alert_history_checker.py
-│   └── japan_clinical_data_search.py  # Extension Phase 5
+│   └── japan_clinical_data_search.py  # Extension Phase 5 — queries japan_knowledge collection
 ├── knowledge_base/
 │   ├── raw_documents/         # Source PDFs (9 HPA/AD-8 documents)
 │   ├── processed_chunks/      # HPA chunks (5 categories) + Japan chunks (4 categories, Phase 5)
@@ -139,13 +187,16 @@ This system must **never** be classified as a Software as a Medical Device under
 
 Compliance tests must achieve: **0% prohibited term leaks**, **100% disclaimer coverage**.
 
-## Scripts
+## Scripts & Tools
 
-| Script | Purpose |
+| File | Purpose |
 |---|---|
 | `scripts/download_hpa_docs.py` | Automates HPA PDF downloads (AD-8 requires manual download) |
 | `scripts/process_pdfs.py` | Uses gemini-cli (`@filename` syntax) to extract and chunk each PDF into `knowledge_base/processed_chunks/`. Run: `python3 scripts/process_pdfs.py [--file <filename>]` |
 | `scripts/requirements.txt` | `requests`, `beautifulsoup4` |
+| `tools/embedding_pipeline.py` | *(Phase 1 — to build)* Embeds all chunks from `processed_chunks/` using bge-m3 and indexes into Qdrant `hpa_knowledge` collection. Enforces AD-8 partition isolation. |
+| `tools/hpa_rag_search.py` | *(Phase 2 — to build)* `search_hpa_guidelines` MCP tool. Hybrid search (dense + sparse) on `hpa_knowledge`. Hard filters: `medical_content == false` always; `audience != internal_reasoning_only` for general queries. |
+| `tools/japan_clinical_data_search.py` | *(Phase 5 — to build)* `search_japan_clinical_data` MCP tool. Queries `japan_knowledge` collection. Requires `purpose` field. Must never feed into `generate_line_report`. |
 
 ## Acceptance KPIs
 

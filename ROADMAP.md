@@ -41,8 +41,9 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 - [ ] Run filter over all chunks; achieve ≥ 99% accuracy (any pharmaceutical content passing through is a direct legal risk)
 
 **Vector Database**
-- [ ] Deploy vector database with the five category partitions
-- [ ] Run embedding pipeline over all processed chunks
+- [ ] Deploy **Qdrant** (embedded/local mode, no Docker required) — collection: `hpa_knowledge`
+- [ ] Run embedding pipeline using **BAAI/bge-m3** (local multilingual model, Chinese + English) — produces both dense and sparse vectors for hybrid search
+- [ ] Configure payload filters: `medical_content == false` (always enforced); `audience != internal_reasoning_only` (general RAG); AD-8 chunks (`dementia_care_004`, `dementia_care_008`) accessible only via direct audience-filtered lookup, never returned by general queries
 - [ ] Validate index with 30-query manual evaluation for retrieval relevance
 
 **Baseline System Design**
@@ -216,7 +217,8 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 - [ ] Enforce architectural firewall: this tool's output must never flow into `generate_line_report`
 
 **Vector Index**
-- [ ] Deploy four new category partitions in vector database
+- [ ] Deploy second Qdrant collection: `japan_knowledge` — four category partitions (`jphc_lifestyle_outcomes`, `mhlw_hj21_nutrition_activity`, `taiwan_japan_disability_comparison`, `japan_community_dementia_care`)
+- [ ] Embed Japanese chunks using same bge-m3 model (multilingual, handles Japanese source material)
 - [ ] Run 20-query calibration validation per category
 
 **Architecture Audit**
