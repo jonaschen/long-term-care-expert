@@ -88,7 +88,7 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 
 **MCP Tools (`tools/`)**
 - [ ] Implement `mcp_server.py` (FastMCP main server)
-- [ ] Implement `hpa_rag_search.py` — `search_hpa_guidelines` tool (enforce `exclude_medical: true` at implementation level)
+- [ ] Implement `hpa_rag_search.py` — `search_hpa_guidelines` tool (enforce `exclude_medical: true` at implementation level; enforce `audience: internal_reasoning_only` exclusion — chunks with this tag, currently only AD-8 `dementia_care_004`, must never be returned by RAG queries; store in a separate non-queryable partition or apply hard filter)
 - [ ] Implement `line_report_generator.py` — `generate_line_report` tool (auto-inject mandatory legal disclaimer into every message footer; make disclaimer non-removable)
 - [ ] Implement `alert_history_checker.py` — `check_alert_history` tool
 
@@ -253,6 +253,7 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 
 **L2 Enrichments**
 - [ ] `mobility-fall-expert`: add Step 2.5 Japan calibration check — call context expert when gait slowdown ≥ 5 days; apply Taiwan-elevated sensitivity (49.82% vs Japan's 36.07% mobility disability)
+- [ ] `mobility-fall-expert`: add `taiwan_mobility_sensitivity_note.md` reference file — explains Taiwan's higher mobility disability prevalence and why gait signals warrant earlier attention
 - [ ] `dementia-behavior-expert`: add Step 1.5 ME-BYO cognitive fast-path — any single strong cognitive signal (wandering, appliance difficulty, 3+ day inactivity) triggers immediate calibration; do not wait for multi-domain convergence
 - [ ] `dementia-behavior-expert`: add Step 1.7 social disengagement detection — 3+ consecutive days of inactivity evaluated as social withdrawal signal using Omuta/Mitsugi evidence; `hpa_suggestion` must include community re-engagement element
 - [ ] `dementia-behavior-expert`: add `japan_community_care_for_dementia.md` reference file

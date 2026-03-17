@@ -30,9 +30,10 @@ Refer to `LONGTERM_CARE_EXPERT_DEV_PLAN.md` for full implementation details and 
 | Step | Status |
 |---|---|
 | Download 9 HPA source PDFs | ✅ Complete |
-| Extract + chunk all PDFs via `scripts/process_pdfs.py` | ✅ Complete (18 chunks) |
+| Initial extraction via `scripts/process_pdfs.py` | ✅ Complete (18 chunks — one per document) |
 | Compliance scan (blacklist, 0 violations) | ✅ Passed |
-| Build vector index (target: ≥ 500 chunks) | ⬜ Pending |
+| Expand to fine-grained semantic chunks (target: ≥ 500) | ⬜ Pending (currently 18/500+) |
+| Build vector index | ⬜ Pending |
 | 30-query RAG relevance evaluation | ⬜ Pending |
 | Design per-user baseline data structure | ⬜ Pending |
 
@@ -85,8 +86,11 @@ python scripts/download_hpa_docs.py
 
 ### Remaining Phase 1 Steps
 
-1. Build vector database with the five category partitions (`fall_prevention`, `dementia_care`, `sleep_hygiene`, `chronic_disease_lifestyle`, `general_aging`)
-2. Run embedding pipeline over all processed chunks — target ≥ 500 chunks (split large chunks if needed)
-3. Validate index with 30-query manual evaluation (target: ≥ 4/5 relevance)
-4. Design per-user behavioral baseline data structure for `memory/user_baselines/`
-5. Implement 14-day silent learning period logic
+1. **Expand chunking** — re-run `process_pdfs.py` with section-level prompts to produce 50–100 chunks per large document; target ≥ 500 total across 5 categories
+2. Build vector database with the five category partitions (`fall_prevention`, `dementia_care`, `sleep_hygiene`, `chronic_disease_lifestyle`, `general_aging`)
+3. Run embedding pipeline over all processed chunks
+4. Validate index with 30-query manual evaluation (target: ≥ 4/5 relevance)
+5. Design per-user behavioral baseline data structure for `memory/user_baselines/`
+6. Implement 14-day silent learning period logic
+
+> **Note on AD-8 chunks:** `dementia_care_004` / `ad8_behavioral_domains_full.md` are marked `audience: internal_reasoning_only`. They must be stored in a non-queryable partition (or filtered out of all RAG results). The `dementia-behavior-expert` skill accesses them via direct lookup only — they must never surface through `search_hpa_guidelines`.
