@@ -11,7 +11,7 @@ Chunk ID: dementia_care_004
 This chunk is an internal reasoning reference for the dementia-behavior-expert skill.
 The AD-8 instrument must never be named, scored, or referenced in any report sent to families.
 It must never be used as a scoring instrument. It is used solely to inform which
-behavioral patterns are clinically recognized as worth gentle monitoring.
+behavioral patterns are worth gentle monitoring over time.
 
 ## Eight Behavioral Domains Worth Observing Over Time
 
@@ -51,7 +51,7 @@ or unusual inactivity, these eight behavioral domains serve as a structured fram
 to identify *which aspects of daily functioning may warrant attention*.
 
 The skill should use these domains only to:
-- Frame the relevant behavioral observation in warm, non-clinical language
+- Frame the relevant behavioral observation in warm, family-accessible language
 - Identify which HPA health education content (via search_hpa_guidelines) is most
   relevant to the observed pattern
 - Suggest what families might gently observe over the coming days

@@ -22,4 +22,4 @@ Chunk ID: chronic_disease_lifestyle_001
 
 ## Social and Mental Health
 - **Engagement:** Participate in community centers or seniors' schools to stimulate the brain and reduce stress.
-- **Emotion:** Low mood may be related to chronic conditions; seek professional evaluation rather than self-labeling as "depressed."
+- **Emotion:** Persistent low mood is worth discussing with a professional rather than self-labeling — a supportive conversation can help clarify next steps.

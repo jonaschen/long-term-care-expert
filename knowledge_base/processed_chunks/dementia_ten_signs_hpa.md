@@ -8,7 +8,7 @@ Chunk ID: dementia_care_002
 
 ## Ten Behavioral Changes Worth Noticing Over Time
 
-These are observable changes in day-to-day behavior and routines — not clinical criteria.
+These are observable changes in day-to-day behavior and routines — not assessment criteria.
 Families should look for *sustained changes from the elder's own usual pattern*, not
 isolated incidents.
 

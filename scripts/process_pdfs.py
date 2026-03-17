@@ -46,7 +46,8 @@ TODAY = datetime.date.today().isoformat()
 BLACKLIST = [
     "diagnos", "diagnosis", "diagnosed",
     "treatment", "treated", "treatment plan",
-    "disorder", "syndrome", "disease", "condition", "illness",
+    "disorder", "syndrome", "disease",
+    "medical condition", "chronic condition",
     "prescription", "prescribe", "medication",
     "sleeping pills", "melatonin",
     "alzheimer", "parkinson",
@@ -120,6 +121,7 @@ Aim for 300-500 words of useful content. Do not summarize — extract the actual
         "category": "fall_prevention",
         "audience": "family_caregiver",
         "source_label": "Taiwan HPA — 老人防跌工作手冊",
+        "timeout": 360,
         "prompt": f"""
 You are reading the Taiwan HPA professional elder fall prevention handbook (老人防跌工作手冊),
 which is aimed at care workers and family caregivers.
@@ -188,6 +190,7 @@ End with a short "What Families Can Do" section (3-4 bullet points of supportive
         "category": "dementia_care",
         "audience": "family_caregiver",
         "source_label": "Taiwan HPA — 失智症照顧者使用手冊",
+        "timeout": 300,
         "prompt": f"""
 You are reading the Taiwan HPA dementia caregiver handbook.
 
@@ -256,6 +259,7 @@ Aim for 400-600 words.
         "category": "chronic_disease_lifestyle",
         "audience": "family_caregiver",
         "source_label": "Taiwan HPA — 全民身體活動指引",
+        "timeout": 300,
         "prompt": f"""
 You are reading Taiwan's National Physical Activity Guidelines (全民身體活動指引).
 
@@ -387,9 +391,10 @@ def process_document(doc: dict, dry_run: bool = False) -> bool:
         print(f"  [dry-run] Would write to {output_path}")
         return True
 
-    print(f"  Calling gemini-cli...")
+    timeout = doc.get("timeout", 120)
+    print(f"  Calling gemini-cli (timeout={timeout}s)...")
     try:
-        response = run_gemini(pdf_path, doc["prompt"])
+        response = run_gemini(pdf_path, doc["prompt"], timeout=timeout)
     except Exception as exc:
         print(f"  ✗  gemini-cli failed: {exc}")
         return False
