@@ -1,0 +1,7 @@
+.venv/
+knowledge_base/vector_index/
+memory/user_baselines/
+__pycache__/
+*.pyc
+*.pyo
+.env

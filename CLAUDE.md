@@ -4,9 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **planning-phase project** for building `long-term-care-expert`, a hierarchical two-layer Claude Agent Skill Set for elderly home care monitoring in Taiwan. The full specification is in `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — read it completely before writing any code.
+This is a **Phase 1 in-progress project** for building `long-term-care-expert`, a hierarchical two-layer Claude Agent Skill Set for elderly home care monitoring in Taiwan.
 
-**Current state:** Phase 1 in progress. Knowledge base stub documents and processed chunks exist. A download script (`scripts/download_hpa_docs.py`) is available to fetch the HPA PDFs — run it in an environment with internet access. PDF downloads pending for HPA EBook sources; AD-8 requires a one-time manual download. No skill or tool code written yet.
+Two specification documents must be read before writing any code:
+- `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — core system architecture, all five L2 Skills, three MCP tools, SaMD compliance rules, Phases 1–4
+- `LONG_TERM_CARE_EXT_PLAN.md` — Japan calibration layer extension: new `east-asian-health-context-expert` Skill, `search_japan_clinical_data` tool, four Japanese RAG categories, enrichments to three existing Skills, Phases 5–6
+
+**Current state:** Phase 1 in progress. Source PDFs downloaded to `knowledge_base/raw_documents/`. `scripts/process_pdfs.py` uses gemini-cli to extract and chunk content from each PDF. No skill or tool code written yet.
 
 ## Knowledge Base — Current State
 
@@ -33,6 +37,24 @@ These stubs pass the blacklisted-term compliance scan. Once real PDFs are downlo
 - Run blacklist scan before indexing: `grep -rni "sarcopenia|medication|sleeping pill|melatonin|diagnos|disorder|prescription|alzheimer|parkinson|BPSD|rehabilitation" knowledge_base/processed_chunks/`
 - `exclude_medical: true` must always be set when calling `search_hpa_guidelines`
 
+## Two-Pillar Knowledge Architecture
+
+The system uses two strictly separated knowledge pillars:
+
+| Pillar | Source | RAG Tool | Used For |
+|---|---|---|---|
+| HPA (Pillar 1) | Taiwan Health Promotion Administration | `search_hpa_guidelines` | All family-facing language and suggestions |
+| Japan (Pillar 2) | MHLW / JPHC / comparative disability research | `search_japan_clinical_data` | Internal calibration only — **never in family output** |
+
+**The firewall between pillars is absolute.** Japan data informs when the system pays attention and what thresholds matter. It must never appear in any text delivered to families.
+
+### Japan Calibration Layer — Key Facts
+- Taiwan's elderly have higher mobility disability (49.82%) than Japan (36.07%) → gait signals need higher sensitivity
+- Taiwan's elderly have higher IADL disability (30.36% vs Japan's 19.30%)
+- Taiwan's loneliness rises faster with age than Japan's → social disengagement signals carry elevated weight
+- JPHC (30-year, 140,000 participants): tea/coffee, fish, and activity regularity are documented protective factors for dementia in East Asian populations
+- ME-BYO cognitive domain signals (wandering, appliance difficulty, prolonged inactivity) have lower reversibility than metabolic/locomotor signals — trigger calibration immediately, not after multi-domain convergence
+
 ## Planned Directory Structure
 
 ```
@@ -46,15 +68,17 @@ long-term-care-expert/
 │   ├── L2-mobility-fall-expert/
 │   ├── L2-dementia-behavior-expert/
 │   ├── L2-chronic-disease-observer/
-│   └── L2-weekly-summary-composer/
+│   ├── L2-weekly-summary-composer/
+│   └── L2-east-asian-health-context/  # Extension Phase 6 — internal calibration only
 ├── tools/
 │   ├── mcp_server.py          # FastMCP server
 │   ├── hpa_rag_search.py
 │   ├── line_report_generator.py
-│   └── alert_history_checker.py
+│   ├── alert_history_checker.py
+│   └── japan_clinical_data_search.py  # Extension Phase 5
 ├── knowledge_base/
-│   ├── raw_documents/
-│   ├── processed_chunks/
+│   ├── raw_documents/         # Source PDFs (9 HPA/AD-8 documents)
+│   ├── processed_chunks/      # HPA chunks (5 categories) + Japan chunks (4 categories, Phase 5)
 │   └── vector_index/
 ├── compliance/
 │   ├── blacklist_terms.json
@@ -71,7 +95,12 @@ long-term-care-expert/
 
 **Layer 1 — `ltc-insight-router`:** Aggregates 24-72 hours of JSON behavioral events from IoT edge devices. Compares against a personal 14-day baseline. Calls `check_alert_history` to suppress duplicate reports (48-72h window). Single-event anomalies are **always suppressed** — only multi-day trends route to L2.
 
-**Layer 2 — Domain Experts (5 Skills):** Each expert handles one behavioral domain and outputs exclusively via `generate_line_report`. They never output raw text to the user.
+**Layer 2 — Domain Experts (6 Skills total):** Five core Skills handle behavioral domains and output exclusively via `generate_line_report`. One extension Skill (`east-asian-health-context-expert`) is internal-only — called by three core Skills for calibration, never produces family-facing output.
+
+### Extension Skill Activation Rules
+- `mobility-fall-expert` → calls `east-asian-health-context-expert` when gait slowdown persists ≥ 5 days
+- `dementia-behavior-expert` → calls it immediately on ANY single cognitive signal (wandering, appliance difficulty, 3+ day inactivity); also on multi-domain ME-BYO convergence
+- `weekly-summary-composer` → calls it once per weekly cycle for aggregate trend assessment
 
 ### Routing Thresholds
 
@@ -90,6 +119,7 @@ long-term-care-expert/
 1. **`search_hpa_guidelines`** — RAG from Taiwan HPA knowledge base. Always use `exclude_medical: true`.
 2. **`generate_line_report`** — The only valid L2 output channel. Auto-injects legal disclaimer.
 3. **`check_alert_history`** — Used by L1 to prevent alert fatigue.
+4. **`search_japan_clinical_data`** *(Extension Phase 5)* — RAG from Japanese MHLW/JPHC data. Used **only** by `east-asian-health-context-expert` for internal calibration. Must never feed into `generate_line_report`. Always use `exclude_medical: true` and include `purpose` field.
 
 ## Non-Negotiable Compliance Rules (SaMD)
 
@@ -109,12 +139,22 @@ This system must **never** be classified as a Software as a Medical Device under
 
 Compliance tests must achieve: **0% prohibited term leaks**, **100% disclaimer coverage**.
 
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `scripts/download_hpa_docs.py` | Automates HPA PDF downloads (AD-8 requires manual download) |
+| `scripts/process_pdfs.py` | Uses gemini-cli (`@filename` syntax) to extract and chunk each PDF into `knowledge_base/processed_chunks/`. Run: `python3 scripts/process_pdfs.py [--file <filename>]` |
+| `scripts/requirements.txt` | `requests`, `beautifulsoup4` |
+
 ## Acceptance KPIs
 
 | Metric | Target |
 |---|---|
 | L1 routing accuracy | ≥ 95% (100-case test suite) |
-| RAG passage relevance | ≥ 4/5 |
+| HPA RAG passage relevance | ≥ 4/5 |
+| Japanese RAG calibration relevance | ≥ 4/5 per category |
 | SaMD violations | 0% |
+| Japan data in family output | 0 instances |
 | Daily push frequency | ≤ 1/day |
 | Family reply rate | ≥ 30% |

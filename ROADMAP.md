@@ -2,6 +2,10 @@
 
 Development roadmap for `long-term-care-expert` — a two-layer Claude Agent Skill Set for privacy-first elderly home care monitoring in Taiwan.
 
+Two specification documents drive this roadmap:
+- `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — core system (Phases 1–4)
+- `LONG_TERM_CARE_EXT_PLAN.md` — Japan calibration layer extension (Phases 5–6, begins after Phase 2 complete)
+
 Each phase has hard acceptance criteria that must pass before the next phase begins.
 
 ---
@@ -185,6 +189,92 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 
 ---
 
+---
+
+## Phase 5 — Japanese Knowledge Base Construction (Extension)
+**Duration:** Month 5
+**Goal:** Build the four Japanese RAG knowledge categories as a second internal calibration pillar. All Japanese data is internal-only — it must never appear in family-facing output.
+
+**Dependency:** Phase 2 acceptance criteria must pass (all five L2 Skills deployed, MCP server operational). Do not build this in parallel with the original system.
+
+### Tasks
+
+**Japanese Knowledge Base**
+- [ ] Collect and process JPHC study summary publications (English versions via NCI/NIH JPHC consortium)
+- [ ] Process HJ21 third-term framework documentation (MHLW English summaries)
+- [ ] Process Taiwan-Japan disability comparison research papers
+- [ ] Collect and process Dementia Supporter Caravan program documentation (MHLW)
+- [ ] Collect and process Omuta City Dementia Care Model outcomes
+- [ ] Collect and process Mitsugi Integrated Community Care System historical evidence
+- [ ] Apply four metadata schemas to every chunk (see `LONG_TERM_CARE_EXT_PLAN.md`)
+- [ ] Build medical content filter for Japanese data (same ≥ 99% accuracy standard as HPA filter)
+
+**New MCP Tool**
+- [ ] Implement `tools/japan_clinical_data_search.py` — `search_japan_clinical_data` tool
+- [ ] Register in FastMCP server with four-category support: `jphc_lifestyle_outcomes`, `mhlw_hj21_nutrition_activity`, `taiwan_japan_disability_comparison`, `japan_community_dementia_care`
+- [ ] Enforce `exclude_medical: true` and `purpose` field at implementation level
+- [ ] Enforce architectural firewall: this tool's output must never flow into `generate_line_report`
+
+**Vector Index**
+- [ ] Deploy four new category partitions in vector database
+- [ ] Run 20-query calibration validation per category
+
+**Architecture Audit**
+- [ ] Verify zero Japanese data passes through to any family-facing output path
+
+### Acceptance Criteria
+| Criterion | Target |
+|---|---|
+| Chunks across four Japanese categories | ≥ 200 (≥ 50 per category, ≥ 30 in `japan_community_dementia_care`) |
+| Medical content filter accuracy | ≥ 99% |
+| Calibration query relevance (20-query per category) | ≥ 4/5 |
+| Japanese data in family-facing output | 0 instances |
+
+---
+
+## Phase 6 — East Asian Context Expert and L2 Enrichments (Extension)
+**Duration:** Month 6
+**Goal:** Deploy the new `east-asian-health-context-expert` Skill and enrich three existing L2 Skills with Japan calibration steps.
+
+**Dependency:** Phase 5 acceptance criteria must pass.
+
+### Tasks
+
+**New Skill: `east-asian-health-context-expert`**
+- [ ] Write `skills/L2-east-asian-health-context/SKILL.md` (internal-only reasoning Skill)
+- [ ] Write reference documents:
+  - `me_byo_framework.md` — ME-BYO four domains with cognitive domain priority note
+  - `jphc_key_findings.md` — curated JPHC findings for calibration use
+  - `taiwan_japan_disability_benchmarks.md` — comparative prevalence data (Taiwan higher on mobility + IADL)
+  - `healthy_life_expectancy_framing.md` — HJ21 "gap" concept
+  - `dementia_supporter_caravan.md` — Caravan model behavioral indicators
+  - `omuta_city_care_model.md` — Omuta community care design
+  - `mitsugi_social_disengagement.md` — social isolation → institutionalization pathway
+
+**L2 Enrichments**
+- [ ] `mobility-fall-expert`: add Step 2.5 Japan calibration check — call context expert when gait slowdown ≥ 5 days; apply Taiwan-elevated sensitivity (49.82% vs Japan's 36.07% mobility disability)
+- [ ] `dementia-behavior-expert`: add Step 1.5 ME-BYO cognitive fast-path — any single strong cognitive signal (wandering, appliance difficulty, 3+ day inactivity) triggers immediate calibration; do not wait for multi-domain convergence
+- [ ] `dementia-behavior-expert`: add Step 1.7 social disengagement detection — 3+ consecutive days of inactivity evaluated as social withdrawal signal using Omuta/Mitsugi evidence; `hpa_suggestion` must include community re-engagement element
+- [ ] `dementia-behavior-expert`: add `japan_community_care_for_dementia.md` reference file
+- [ ] `weekly-summary-composer`: add weekly ME-BYO convergence consultation with context expert; add 🌱 Healthy Active Years Note (positive-trend weeks only — never on declining weeks)
+- [ ] Update `AGENTS.md` to v1.1 (two-pillar knowledge architecture)
+
+**Validation**
+- [ ] Run 30 calibration scenarios for context expert threshold adjustment logic (including 10 cognitive fast-path, 10 social disengagement)
+- [ ] Verify Healthy Active Years Note never appears on declining-trend weeks (4-week simulation)
+- [ ] Full output audit: zero JPHC/MHLW/community care citations in any generated LINE message
+
+### Acceptance Criteria
+| Criterion | Target |
+|---|---|
+| Context expert structured JSON responses | Correct in all 30 test scenarios |
+| Cognitive fast-path trigger rate | 100% of qualifying cognitive signal cases |
+| Social disengagement detection trigger rate | 100% of 3-day+ inactivity cases |
+| Healthy Active Years Note on declining weeks | 0 instances |
+| Japan data citations in LINE output | 0 instances |
+
+---
+
 ## Full KPI Summary
 
 | Category | Metric | Target | Measurement |
@@ -200,22 +290,34 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 | Alert Quality | Daily push frequency | ≤ 1/day | 7-day monitoring (Phase 3) |
 | Engagement | Family reply rate | ≥ 30% | LINE analytics (Phase 4) |
 | Maintenance | Knowledge base update cadence | Quarterly minimum | Version control records |
+| **Extension** | Japanese RAG retrieval relevance | ≥ 4/5 per category | 20-query calibration test (Phase 5) |
+| **Extension** | `japan_community_dementia_care` chunk coverage | ≥ 30 chunks | Chunk count audit (Phase 5) |
+| **Extension** | Japanese data in family-facing output | 0 instances | Full output audit (Phase 6) |
+| **Extension** | Cognitive fast-path trigger rate | 100% of qualifying cases | 10-scenario test (Phase 6) |
+| **Extension** | Social disengagement detection | 100% of 3-day+ inactivity | 10-scenario test (Phase 6) |
+| **Extension** | Healthy Active Years Note on declining weeks | 0 instances | 4-week simulation (Phase 6) |
 
 ---
 
 ## Phase Dependencies
 
 ```
-Phase 1 (Knowledge Base)
+Phase 1 (HPA Knowledge Base)
     │
     ▼ RAG live + medical filter validated
 Phase 2 (Skill Development)
-    │
-    ▼ L1 ≥ 95% routing accuracy + zero prohibited term leaks
-Phase 3 (Edge Integration + Compliance Hardening)
-    │
-    ▼ Red-team 50/50 pass + 100% disclaimer coverage
-Phase 4 (LINE + Field Validation)
+    │ ├──────────────────────────────────────────────────────────┐
+    ▼ ↓ L1 ≥ 95% routing accuracy + zero prohibited term leaks  │
+Phase 3 (Edge Integration + Compliance Hardening)               │
+    │                                                            ▼
+    ▼ Red-team 50/50 pass + 100% disclaimer coverage    Phase 5 (Japanese Knowledge Base)
+Phase 4 (LINE + Field Validation)                               │
+                                                                ▼ ≥ 200 Japanese chunks + 0 family output leaks
+                                                        Phase 6 (East Asian Context Expert + L2 Enrichments)
 ```
 
-No phase begins until the previous phase's acceptance criteria are fully met. The compliance gate between Phase 3 and Phase 4 is the hardest constraint — real families must not be exposed to the system before the SaMD boundary is confirmed clean.
+- Phases 1–4 are the core system and must be completed in sequence.
+- Phase 5 may begin as soon as Phase 2 acceptance criteria are met (parallel with Phases 3–4).
+- Phase 6 requires Phase 5 complete.
+- The compliance gate between Phase 3 and Phase 4 is the hardest constraint — real families must not be exposed to the system before the SaMD boundary is confirmed clean.
+- The architectural firewall between Japanese data and family-facing output (Phases 5–6) is equally non-negotiable.
