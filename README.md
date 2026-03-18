@@ -34,8 +34,9 @@ Refer to `LONGTERM_CARE_EXPERT_DEV_PLAN.md` for full implementation details and 
 | Download 9 HPA source PDFs | ✅ Complete |
 | Initial extraction via `scripts/process_pdfs.py` | ✅ Complete (18 chunks — one per document) |
 | Compliance scan (blacklist, 0 violations) | ✅ Passed |
+| Build Qdrant `hpa_knowledge` collection + embed with bge-m3 | ✅ Complete (18 points indexed, dense + sparse) |
 | Expand to fine-grained semantic chunks (target: ≥ 500) | ⬜ Pending (currently 18/500+) |
-| Build vector index | ⬜ Pending |
+| Re-index after chunk expansion | ⬜ Pending |
 | 30-query RAG relevance evaluation | ⬜ Pending |
 | Design per-user baseline data structure | ⬜ Pending |
 

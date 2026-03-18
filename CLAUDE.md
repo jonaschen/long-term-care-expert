@@ -10,7 +10,7 @@ Two specification documents must be read before writing any code:
 - `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — core system architecture, all five L2 Skills, three MCP tools, SaMD compliance rules, Phases 1–4
 - `LONG_TERM_CARE_EXT_PLAN.md` — Japan calibration layer extension: new `east-asian-health-context-expert` Skill, `search_japan_clinical_data` tool, four Japanese RAG categories, enrichments to three existing Skills, Phases 5–6
 
-**Current state:** Phase 1 in progress. All 9 HPA/AD-8 source PDFs downloaded to `knowledge_base/raw_documents/`. `scripts/process_pdfs.py` uses gemini-cli to extract and chunk content — 18 initial chunks produced (one per document). Chunk expansion to ≥ 500 and vector index build are next. No skill or tool code written yet.
+**Current state:** Phase 1 in progress. All 9 HPA/AD-8 source PDFs downloaded. 18 initial chunks extracted and indexed into Qdrant `hpa_knowledge` collection (dense + sparse vectors via bge-m3). Pending: chunk expansion to ≥ 500, 30-query RAG eval, baseline schema. No skill or tool code written yet.
 
 ## Knowledge Base — Current State
 
@@ -194,7 +194,8 @@ Compliance tests must achieve: **0% prohibited term leaks**, **100% disclaimer c
 | `scripts/download_hpa_docs.py` | Automates HPA PDF downloads (AD-8 requires manual download) |
 | `scripts/process_pdfs.py` | Uses gemini-cli (`@filename` syntax) to extract and chunk each PDF into `knowledge_base/processed_chunks/`. Run: `python3 scripts/process_pdfs.py [--file <filename>]` |
 | `scripts/requirements.txt` | `requests`, `beautifulsoup4` |
-| `tools/embedding_pipeline.py` | *(Phase 1 — to build)* Embeds all chunks from `processed_chunks/` using bge-m3 and indexes into Qdrant `hpa_knowledge` collection. Enforces AD-8 partition isolation. |
+| `tools/embedding_pipeline.py` | Embeds all chunks from `processed_chunks/` using bge-m3 and indexes into Qdrant `hpa_knowledge` collection. Run: `python tools/embedding_pipeline.py [--reset] [--batch-size N] [--dry-run]` |
+| `tools/requirements.txt` | `qdrant-client`, `FlagEmbedding`, `torch`, `transformers>=4.44.2,<5.0.0` ⚠ pin required — FlagEmbedding 1.3.5 incompatible with transformers 5.x |
 | `tools/hpa_rag_search.py` | *(Phase 2 — to build)* `search_hpa_guidelines` MCP tool. Hybrid search (dense + sparse) on `hpa_knowledge`. Hard filters: `medical_content == false` always; `audience != internal_reasoning_only` for general queries. |
 | `tools/japan_clinical_data_search.py` | *(Phase 5 — to build)* `search_japan_clinical_data` MCP tool. Queries `japan_knowledge` collection. Requires `purpose` field. Must never feed into `generate_line_report`. |
 
