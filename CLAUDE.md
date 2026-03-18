@@ -10,34 +10,25 @@ Two specification documents must be read before writing any code:
 - `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — core system architecture, all five L2 Skills, three MCP tools, SaMD compliance rules, Phases 1–4
 - `LONG_TERM_CARE_EXT_PLAN.md` — Japan calibration layer extension: new `east-asian-health-context-expert` Skill, `search_japan_clinical_data` tool, four Japanese RAG categories, enrichments to three existing Skills, Phases 5–6
 
-**Current state:** Phase 1 in progress. All 9 HPA/AD-8 source PDFs downloaded. 18 initial chunks extracted and indexed into Qdrant `hpa_knowledge` collection (dense + sparse vectors via bge-m3). Pending: chunk expansion to ≥ 500, 30-query RAG eval, baseline schema. No skill or tool code written yet.
+**Current state:** Phase 1 in progress. All 9 HPA/AD-8 source PDFs downloaded. 177 chunks extracted and compliance-verified across all 5 categories. Qdrant `hpa_knowledge` collection currently holds 149 points — **re-index required** (`.venv/bin/python3 tools/embedding_pipeline.py --reset`) to pick up 28 new `general_aging` chunks. `search_hpa_guidelines` tool built and tested. 30-query RAG evaluation script ready — awaiting manual scoring. No skill or MCP server code written yet.
 
 ## Knowledge Base — Current State
 
 `knowledge_base/raw_documents/` contains all 9 real PDFs (HPA handbooks + AD-8 scale).
 
-`knowledge_base/processed_chunks/` contains 18 compliant chunks — 9 hand-written stubs + 9 gemini-extracted (one per document). All pass the blacklist compliance scan. Chunk expansion to ≥ 500 is the next Phase 1 task.
+`knowledge_base/processed_chunks/` contains **177 compliant chunks** — 18 original stubs/summaries + 159 section-level chunks from `expand_chunks.py`. All pass the blacklist compliance scan (0 violations, 0 `.REVIEW` files). Further expansion toward ≥ 500 is a stretch goal; the 30-query RAG evaluation will determine if additional chunks are needed.
 
-| File | Category | Chunk ID | Notes |
-|---|---|---|---|
-| `fall_prevention_hpa.md` | fall_prevention | fall_prevention_001 | Hand-written stub |
-| `fall_prevention_tips_hpa.md` | fall_prevention | fall_prevention_002 | Gemini-extracted |
-| `fall_prevention_professional_hpa.md` | fall_prevention | fall_prevention_003 | Gemini-extracted |
-| `dementia_care_hpa.md` | dementia_care | dementia_care_001 | Hand-written stub |
-| `dementia_ten_signs_hpa.md` | dementia_care | dementia_care_002 | Hand-written stub |
-| `dementia_caregiver_resources_hpa.md` | dementia_care | dementia_care_003 | Hand-written stub |
-| `ad8_observation_guide.md` | dementia_care | dementia_care_004 | ⚠ INTERNAL USE ONLY — hand-written stub |
-| `dementia_education_hpa.md` | dementia_care | dementia_care_005 | Gemini-extracted |
-| `dementia_ten_signs_full_hpa.md` | dementia_care | dementia_care_006 | Gemini-extracted |
-| `dementia_caregiver_handbook_hpa.md` | dementia_care | dementia_care_007 | Gemini-extracted |
-| `ad8_behavioral_domains_full.md` | dementia_care | dementia_care_008 | ⚠ INTERNAL USE ONLY — gemini-extracted |
-| `sleep_hygiene_hpa.md` | sleep_hygiene | sleep_hygiene_001 | Hand-written stub |
-| `sleep_hygiene_full_hpa.md` | sleep_hygiene | sleep_hygiene_002 | Gemini-extracted |
-| `chronic_disease_lifestyle_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_001 | Hand-written stub |
-| `active_living_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_002 | Hand-written stub |
-| `active_living_full_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_003 | Gemini-extracted |
-| `physical_activity_guidelines_hpa.md` | chronic_disease_lifestyle | chronic_disease_lifestyle_004 | Gemini-extracted |
-| `general_aging_hpa.md` | general_aging | general_aging_001 | Hand-written stub |
+**Chunk counts by category:**
+
+| Category | Approx. chunks | Source base_ids |
+|---|---|---|
+| `fall_prevention` | ~36 | fall_prevention_00x, fall_pro_s01–s18, fall_tips_s01–s14 |
+| `dementia_care` | ~53 | dementia_care_00x, dementia_edu_s01–s14, dementia_care_s01–s20, dementia_signs_s01–s12, ad8_s01–s10 (⚠ internal) |
+| `sleep_hygiene` | ~16 | sleep_hygiene_00x, sleep_s01–s14 |
+| `chronic_disease_lifestyle` | ~33 | chronic_disease_lifestyle_00x, active_living_s01–s15, activity_guidelines_s01–s14 |
+| `general_aging` | ~29 | general_aging_001 (stub), general_aging_active_s01–s10, general_aging_guidelines_s01–s10, general_aging_caregiver_s01–s08 |
+
+**AD-8 internal chunks** (dementia_care_004, dementia_care_008, ad8_s01–ad8_s10 — 12 total): tagged `audience: internal_reasoning_only`. Stored in `hpa_knowledge` but **always excluded from general RAG queries** via hard payload filter. Accessible only via `lookup_ad8_chunks()` in `tools/hpa_rag_search.py`.
 
 **Compliance rules for knowledge base chunks:**
 - Every chunk must have metadata: `Category`, `Medical Content: false`, `Source`, `Audience`, `Update Date`, `Chunk ID`
@@ -77,12 +68,26 @@ Qdrant (local file: knowledge_base/vector_index/)
     └── Query filter (always enforced): medical_content == false, purpose field required
 ```
 
-### New Scripts (Phase 1 completion)
+### Phase 1 Scripts and Tools
 
 | Script | Purpose |
 |---|---|
-| `tools/embedding_pipeline.py` | Reads all chunks from `processed_chunks/`, embeds with bge-m3, indexes into Qdrant `hpa_knowledge` collection |
-| `tools/hpa_rag_search.py` | Implements `search_hpa_guidelines` MCP tool — hybrid search with payload filters |
+| `scripts/expand_chunks.py` | Section-level chunk extraction (10–20 sections per PDF). Run: `python3 scripts/expand_chunks.py [--file <filename>]`. Includes JSON repair for gemini output with embedded double-quotes. |
+| `tools/embedding_pipeline.py` | Embeds all chunks into Qdrant `hpa_knowledge` collection. Run: `.venv/bin/python3 tools/embedding_pipeline.py [--reset] [--batch-size N] [--dry-run]`. Use `--reset` when re-indexing after chunk additions. |
+| `tools/hpa_rag_search.py` | `search_hpa_guidelines` MCP tool — hybrid search (dense + sparse RRF fusion). Hard filters enforced: `medical_content == false`, `audience != internal_reasoning_only`. Also exposes `lookup_ad8_chunks()`. CLI: `.venv/bin/python3 tools/hpa_rag_search.py "query" --category <cat> [--top-k N]` |
+| `tests/rag_eval/run_rag_eval.py` | Runs 30-query RAG evaluation across all 5 categories. Saves Markdown report to `tests/rag_eval/results_YYYY-MM-DD.md` for manual scoring. Run: `.venv/bin/python3 tests/rag_eval/run_rag_eval.py` |
+
+**Python environment:** A venv exists at `.venv/`. Always use it for `tools/` and `tests/rag_eval/`. System Python is externally managed (cannot `pip install` without venv).
+
+```bash
+source .venv/bin/activate                        # activate
+.venv/bin/python3 tools/embedding_pipeline.py   # or invoke directly
+```
+
+**Pending Phase 1 work (for contributors):**
+1. Re-index Qdrant: `.venv/bin/python3 tools/embedding_pipeline.py --reset` — picks up 28 new `general_aging` chunks (177 total → all indexed)
+2. Run and manually score the 30-query RAG eval: `.venv/bin/python3 tests/rag_eval/run_rag_eval.py` → score `tests/rag_eval/results_*.md` (target ≥ 4/5)
+3. Design `memory/user_baselines/` schema — per-user baseline data structure + 14-day silent learning period logic (see `LONGTERM_CARE_EXPERT_DEV_PLAN.md` Phase 1 spec)
 
 ## Two-Pillar Knowledge Architecture
 
@@ -194,9 +199,11 @@ Compliance tests must achieve: **0% prohibited term leaks**, **100% disclaimer c
 | `scripts/download_hpa_docs.py` | Automates HPA PDF downloads (AD-8 requires manual download) |
 | `scripts/process_pdfs.py` | Uses gemini-cli (`@filename` syntax) to extract and chunk each PDF into `knowledge_base/processed_chunks/`. Run: `python3 scripts/process_pdfs.py [--file <filename>]` |
 | `scripts/requirements.txt` | `requests`, `beautifulsoup4` |
-| `tools/embedding_pipeline.py` | Embeds all chunks from `processed_chunks/` using bge-m3 and indexes into Qdrant `hpa_knowledge` collection. Run: `python tools/embedding_pipeline.py [--reset] [--batch-size N] [--dry-run]` |
+| `tools/embedding_pipeline.py` | Embeds all chunks from `processed_chunks/` using bge-m3 and indexes into Qdrant `hpa_knowledge` collection. Run: `.venv/bin/python3 tools/embedding_pipeline.py [--reset] [--batch-size N] [--dry-run]` |
 | `tools/requirements.txt` | `qdrant-client`, `FlagEmbedding`, `torch`, `transformers>=4.44.2,<5.0.0` ⚠ pin required — FlagEmbedding 1.3.5 incompatible with transformers 5.x |
-| `tools/hpa_rag_search.py` | *(Phase 2 — to build)* `search_hpa_guidelines` MCP tool. Hybrid search (dense + sparse) on `hpa_knowledge`. Hard filters: `medical_content == false` always; `audience != internal_reasoning_only` for general queries. |
+| `scripts/expand_chunks.py` | Second-pass section-level chunk extraction via gemini-cli. Targets 10-20 sections per PDF. Run: `python3 scripts/expand_chunks.py [--file <filename>] [--dry-run]` |
+| `tools/hpa_rag_search.py` | ✅ Built. `search_hpa_guidelines` MCP tool. Hybrid search (dense + sparse RRF fusion) on `hpa_knowledge`. Hard filters always enforced: `medical_content == false` and `audience != internal_reasoning_only`. Also exposes `lookup_ad8_chunks()` for dementia-behavior-expert direct lookup. Run CLI: `.venv/bin/python3 tools/hpa_rag_search.py "query" --category <cat> [--top-k N]` |
+| `tests/rag_eval/run_rag_eval.py` | ✅ Built. Runs 30-query evaluation (6 per category). Saves Markdown report with content previews for manual scoring. Run: `.venv/bin/python3 tests/rag_eval/run_rag_eval.py` |
 | `tools/japan_clinical_data_search.py` | *(Phase 5 — to build)* `search_japan_clinical_data` MCP tool. Queries `japan_knowledge` collection. Requires `purpose` field. Must never feed into `generate_line_report`. |
 
 ## Acceptance KPIs

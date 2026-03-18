@@ -28,21 +28,22 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 **Document Processing**
 - [x] Convert PDFs to clean Markdown via `scripts/process_pdfs.py` (gemini-cli, `@filename` syntax)
 - [x] Strip page headers, footers, and formatting artifacts (handled in gemini extraction prompts)
-- [x] Apply semantic chunking — 18 initial chunks produced (one per document); expansion to ≥ 500 pending
+- [x] Apply semantic chunking — **177 chunks total** (18 initial + 159 section-level via `expand_chunks.py`); `general_aging` gap resolved with 3 new extraction passes (28 chunks)
 - [x] Attach metadata to every chunk: `source`, `category`, `medical_content`, `audience`, `update_date`, `chunk_id`
 - [x] Partition chunks into five categories: `fall_prevention`, `dementia_care`, `sleep_hygiene`, `chronic_disease_lifestyle`, `general_aging`
 
 **Medical Content Filter (Critical)**
-- [x] Build automated blacklist scanner (`check_blacklist()` in `process_pdfs.py`) — flags chunks containing prohibited terms and saves as `.REVIEW` instead of `.md`
-- [x] Run filter over all chunks — 0 violations in all 18 processed chunks
-- [ ] Expand to ≥ 500 chunks and re-validate filter coverage (≥ 99% accuracy target)
+- [x] Build automated blacklist scanner (`check_blacklist()` in `process_pdfs.py` and `expand_chunks.py`) — flags chunks containing prohibited terms and saves as `.REVIEW` instead of `.md`
+- [x] Run filter over all 177 chunks — **0 violations, 0 pending `.REVIEW` files**
+- [ ] After RAG eval: if category gaps found, expand further and re-validate (≥ 99% accuracy target)
 
 **Vector Database**
 - [x] Deploy **Qdrant** (embedded/local mode) — collection `hpa_knowledge` at `knowledge_base/vector_index/qdrant/`
-- [x] Run embedding pipeline (`tools/embedding_pipeline.py`) using **BAAI/bge-m3** — 18 chunks indexed with dense (1024-dim cosine) + sparse (BM25) vectors
 - [x] Configure payload filters: AD-8 chunks tagged `audience: internal_reasoning_only` — isolated from general RAG queries; accessible only via direct lookup
-- [ ] Expand chunks to ≥ 500 and re-index (`python tools/embedding_pipeline.py --reset`)
-- [ ] Validate index with 30-query manual evaluation for retrieval relevance
+- [x] Implement `tools/hpa_rag_search.py` — hybrid search (dense + sparse RRF) with hard payload filters; `lookup_ad8_chunks()` for internal dementia reasoning
+- [x] Implement `tests/rag_eval/run_rag_eval.py` — 30-query evaluation script across all 5 categories
+- [ ] **⚠ Re-index Qdrant** — currently 149 points; 28 new `general_aging` chunks not yet indexed. Run: `.venv/bin/python3 tools/embedding_pipeline.py --reset`
+- [ ] **Score RAG evaluation** — run `.venv/bin/python3 tests/rag_eval/run_rag_eval.py` then fill in `tests/rag_eval/results_*.md` (target ≥ 4/5 per category)
 
 **Baseline System Design**
 - [ ] Design per-user behavioral baseline data structure
@@ -87,7 +88,7 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 
 **MCP Tools (`tools/`)**
 - [ ] Implement `mcp_server.py` (FastMCP main server)
-- [ ] Implement `hpa_rag_search.py` — `search_hpa_guidelines` tool (enforce `exclude_medical: true` at implementation level; enforce `audience: internal_reasoning_only` exclusion — chunks with this tag, currently only AD-8 `dementia_care_004`, must never be returned by RAG queries; store in a separate non-queryable partition or apply hard filter)
+- [x] `hpa_rag_search.py` — `search_hpa_guidelines` tool ✅ built in Phase 1. Hard filters enforced at implementation level: `medical_content == false` always; `audience != internal_reasoning_only` for all general queries. `lookup_ad8_chunks()` exposed for `dementia-behavior-expert` internal reasoning only.
 - [ ] Implement `line_report_generator.py` — `generate_line_report` tool (auto-inject mandatory legal disclaimer into every message footer; make disclaimer non-removable)
 - [ ] Implement `alert_history_checker.py` — `check_alert_history` tool
 

@@ -33,30 +33,60 @@ Refer to `LONGTERM_CARE_EXPERT_DEV_PLAN.md` for full implementation details and 
 |---|---|
 | Download 9 HPA source PDFs | ✅ Complete |
 | Initial extraction via `scripts/process_pdfs.py` | ✅ Complete (18 chunks — one per document) |
+| Section-level expansion via `scripts/expand_chunks.py` | ✅ Complete (177 chunks total, 0 violations) |
 | Compliance scan (blacklist, 0 violations) | ✅ Passed |
-| Build Qdrant `hpa_knowledge` collection + embed with bge-m3 | ✅ Complete (18 points indexed, dense + sparse) |
-| Expand to fine-grained semantic chunks (target: ≥ 500) | ⬜ Pending (currently 18/500+) |
-| Re-index after chunk expansion | ⬜ Pending |
-| 30-query RAG relevance evaluation | ⬜ Pending |
+| Build Qdrant `hpa_knowledge` collection + embed with bge-m3 | ⚠ Re-index needed (Qdrant has 149 pts; 177 chunks in `processed_chunks/`) |
+| `tools/hpa_rag_search.py` — `search_hpa_guidelines` MCP tool | ✅ Complete — hybrid search (dense + sparse RRF), hard payload filters, AD-8 direct lookup |
+| 30-query RAG evaluation script | ✅ Complete (`tests/rag_eval/run_rag_eval.py`) |
+| 30-query RAG relevance evaluation — manual scoring | ⬜ Pending (run eval, score results in `tests/rag_eval/results_YYYY-MM-DD.md`) |
 | Design per-user baseline data structure | ⬜ Pending |
 
-### PDF Processing
+### Immediate Next Steps for Contributors
 
-Run gemini-cli based extraction:
-
+**1. Re-index Qdrant** (28 new `general_aging` chunks not yet indexed):
 ```bash
-python3 scripts/process_pdfs.py           # process all 9 documents
-python3 scripts/process_pdfs.py --file 失智症十大警訊.pdf  # single file
-python3 scripts/process_pdfs.py --dry-run  # preview without calling gemini
+source .venv/bin/activate
+python tools/embedding_pipeline.py --reset
 ```
 
-Run compliance scan on processed chunks:
-
+**2. Re-run and score the RAG evaluation:**
 ```bash
-grep -rni "sarcopenia|medication|sleeping pill|diagnos|disorder" knowledge_base/processed_chunks/
+python tests/rag_eval/run_rag_eval.py
+# Then open tests/rag_eval/results_YYYY-MM-DD.md and fill in Score: ?/5 for each query
+# Target: ≥ 4/5 average across all 30 queries
 ```
 
-### Download Script (if re-downloading)
+**3. If general_aging scores < 4/5** — that category had only one stub until recently. The 3 new extraction passes (28 chunks) should fix it. If still weak after re-index, consider sourcing an additional HPA general aging document.
+
+**4. Design `memory/user_baselines/` schema** — per-user behavioral baseline (14-day silent learning period, then report generation begins). See `LONGTERM_CARE_EXPERT_DEV_PLAN.md` Phase 1 spec.
+
+### Python Environment
+
+A venv exists at `.venv/`. Always use it for `tools/`:
+```bash
+source .venv/bin/activate          # activate
+.venv/bin/python3 tools/...        # or invoke directly
+```
+System Python is externally managed — `pip install` without the venv will fail.
+
+### PDF Processing Scripts
+
+```bash
+# Initial summary extraction (one chunk per document)
+python3 scripts/process_pdfs.py
+python3 scripts/process_pdfs.py --file 失智症十大警訊.pdf
+python3 scripts/process_pdfs.py --dry-run
+
+# Section-level expansion (10–20 chunks per document)
+python3 scripts/expand_chunks.py
+python3 scripts/expand_chunks.py --file "健康老化手冊_睡眠篇.pdf"
+python3 scripts/expand_chunks.py --dry-run
+
+# Compliance scan
+grep -rni "sarcopenia|medication|sleeping pill|melatonin|diagnos|disorder|prescription|alzheimer|parkinson|BPSD|rehabilitation|clinical" knowledge_base/processed_chunks/
+```
+
+### Download Script (if re-downloading PDFs)
 
 ```bash
 pip install -r scripts/requirements.txt
@@ -85,15 +115,4 @@ python scripts/download_hpa_docs.py
     `dementia-behavior-expert` skill only. Must **never** appear in family-facing output
     and must never be used as a scoring instrument.
 
----
-
-### Remaining Phase 1 Steps
-
-1. **Expand chunking** — re-run `process_pdfs.py` with section-level prompts to produce 50–100 chunks per large document; target ≥ 500 total across 5 categories
-2. Build vector database with the five category partitions (`fall_prevention`, `dementia_care`, `sleep_hygiene`, `chronic_disease_lifestyle`, `general_aging`)
-3. Run embedding pipeline over all processed chunks
-4. Validate index with 30-query manual evaluation (target: ≥ 4/5 relevance)
-5. Design per-user behavioral baseline data structure for `memory/user_baselines/`
-6. Implement 14-day silent learning period logic
-
-> **Note on AD-8 chunks:** `dementia_care_004` / `ad8_behavioral_domains_full.md` are marked `audience: internal_reasoning_only`. They must be stored in a non-queryable partition (or filtered out of all RAG results). The `dementia-behavior-expert` skill accesses them via direct lookup only — they must never surface through `search_hpa_guidelines`.
+> **AD-8 isolation rule:** Chunks tagged `audience: internal_reasoning_only` are stored in `hpa_knowledge` but are **excluded from all general RAG queries** via hard payload filter. They are accessible only via `lookup_ad8_chunks()` in `tools/hpa_rag_search.py` — never through `search_hpa_guidelines`.
