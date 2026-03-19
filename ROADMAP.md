@@ -98,22 +98,23 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 - [x] Write `compliance/blacklist_terms.json`
 - [x] Write `compliance/whitelist_terms.json`
 - [x] Write `compliance/disclaimer_template.md`
-- [ ] Build automated blacklist scanner that runs over all generated test outputs
+- [x] Build automated blacklist scanner (`tests/compliance_tests/blacklist_scanner.py`) — scans LINE Flex Messages and raw text for prohibited terms, whitelist coverage, and disclaimer injection. CLI + module API. 40 unit tests passing.
 - [x] Prepare 50-case adversarial test suite for Phase 3 (`compliance/adversarial_test_cases.json`)
 
 **Evaluation**
-- [ ] Run 30 manually evaluated report generation cases per L2 Skill
-- [ ] Audit all test outputs for prohibited term leaks
+- [x] Build 30-case evaluation test suite per L2 Skill (`tests/skill_eval/test_cases/`) — 150 test cases total across 5 skills
+- [ ] Run 30 manually evaluated report generation cases per L2 Skill (requires running L2 agents against test cases)
+- [ ] Audit all test outputs for prohibited term leaks (run `blacklist_scanner.py --scan-dir` over outputs)
 
 ### Acceptance Criteria
 | Criterion | Target | Result |
 |---|---|---|
 | L1 routing accuracy (100-case test) | ≥ 95% | ⬜ Pending — run L1 agent against `tests/routing_accuracy/test_cases_100.json` |
-| L2 insight quality (30-case eval per Skill) | ≥ 4/5 | ⬜ Pending — 30 cases × 5 Skills, manual scoring |
+| L2 insight quality (30-case eval per Skill) | ≥ 4/5 | ⬜ Pending — test cases built (`tests/skill_eval/test_cases/`), requires running L2 agents |
 | MCP tool call success rate | ≥ 99% | ⬜ Pending — validate during eval runs |
-| Prohibited term leak rate (30-case test) | 0% | ⬜ Pending — automated scanner not yet built |
+| Prohibited term leak rate (30-case test) | 0% | ⬜ Pending — scanner built (`tests/compliance_tests/blacklist_scanner.py`), run after L2 eval |
 
-**Phase 2 status: ~85% complete.** All code and content artifacts created. Three evaluation tasks remain before Phase 3 can begin.
+**Phase 2 status: ~90% complete.** All code, content artifacts, test suites, and compliance tools created. Two evaluation tasks remain (L1 routing validation, L2 quality eval) — both require running Claude agents against test suites.
 
 ---
 

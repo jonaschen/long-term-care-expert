@@ -446,8 +446,10 @@ class TestEdgeCases:
         assert result.passed is True
         assert result.whitelist_covered is True
 
-    def test_partial_term_no_false_positive(self, scanner: ComplianceScanner):
-        # "treat" is prohibited, so "treated" should match too
+    def test_partial_term_substring_matching(self, scanner: ComplianceScanner):
+        # Substring matching is intentional — matches line_report_generator.py
+        # behavior. STRICT enforcement means "treated" triggers on "treat".
+        # This is by design for SaMD zero-tolerance compliance.
         result = scanner.scan_text("The elder was treated warmly.")
         # "treated" contains "treat" so this WILL be caught
         assert result.passed is False

@@ -10,7 +10,7 @@ Two specification documents must be read before writing any code:
 - `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — core system architecture, all five L2 Skills, three MCP tools, SaMD compliance rules, Phases 1–4
 - `LONG_TERM_CARE_EXT_PLAN.md` — Japan calibration layer extension: new `east-asian-health-context-expert` Skill, `search_japan_clinical_data` tool, four Japanese RAG categories, enrichments to three existing Skills, Phases 5–6
 
-**Current state:** Phase 1 complete. Phase 2 substantially complete. All L1/L2 SKILL.md files written. FastMCP server built with 3 MCP tools. All L2 reference docs and utility scripts created. Compliance files complete. 100-case routing test suite and 50-case adversarial test suite built. Knowledge base: 177 chunks indexed in Qdrant (177/177 points). RAG evaluation complete — **4.87/5 overall** (all 5 categories ≥ 4/5). **Remaining Phase 2 blockers:** (1) L1 routing validation against 100-case test suite, (2) automated blacklist scanner for generated outputs, (3) 30-case quality eval per L2 Skill.
+**Current state:** Phase 1 complete. Phase 2 ~90% complete. All L1/L2 SKILL.md files written. FastMCP server built with 3 MCP tools. All L2 reference docs and utility scripts created. Compliance files complete. 100-case routing test suite and 50-case adversarial test suite built. **Automated blacklist scanner** built and tested (40 unit tests) at `tests/compliance_tests/blacklist_scanner.py`. **150 L2 skill evaluation test cases** built (30 per skill × 5 skills) at `tests/skill_eval/test_cases/`. Knowledge base: 177 chunks indexed in Qdrant (177/177 points). RAG evaluation complete — **4.87/5 overall** (all 5 categories ≥ 4/5). **Remaining Phase 2 blockers:** (1) L1 routing validation against 100-case test suite (requires running L1 agent), (2) 30-case quality eval per L2 Skill (requires running L2 agents against test cases, then scanning outputs with blacklist scanner).
 
 ## Knowledge Base — Current State
 
@@ -85,6 +85,8 @@ Qdrant (local file: knowledge_base/vector_index/)
 | `tools/mcp_server.py` | FastMCP server exposing 3 tools: `search_hpa_guidelines`, `generate_line_report`, `check_alert_history`. |
 | `tools/line_report_generator.py` | `generate_line_report` tool — blacklist scanning of output text and auto-injection of mandatory legal disclaimer from `compliance/disclaimer_template.md`. |
 | `tools/alert_history_checker.py` | `check_alert_history` tool — alert suppression within 48-72h window to prevent alert fatigue. Used by L1 router. |
+| `tests/compliance_tests/blacklist_scanner.py` | ✅ Automated compliance scanner. Scans LINE Flex Messages and raw text for prohibited terms, whitelist coverage, and disclaimer injection. CLI: `python blacklist_scanner.py --scan-file FILE \| --scan-dir DIR \| --scan-text TEXT [--json-output] [--strict]`. Module API: `ComplianceScanner().scan_text()` / `.scan_flex_message()` / `.scan_directory()`. |
+| `tests/skill_eval/test_cases/*.json` | ✅ 150 L2 skill evaluation test cases (30 per skill × 5 skills). Each file contains routing payloads, expected behaviors, and prohibited terms for compliance validation. |
 
 **Python environment:** A venv exists at `.venv/`. Always use it for `tools/` and `tests/rag_eval/`. System Python is externally managed (cannot `pip install` without venv).
 
@@ -101,8 +103,7 @@ Qdrant (local file: knowledge_base/vector_index/)
 
 **Pending work (for contributors):**
 1. Validate L1 routing against 100-case test suite — run L1 agent against `tests/routing_accuracy/test_cases_100.json`, target ≥ 95% accuracy
-2. Build automated blacklist scanner for generated test outputs (scans `generate_line_report` outputs for prohibited terms)
-3. Run 30 manually evaluated report generation cases per L2 Skill (target ≥ 4/5 quality)
+2. Run L2 agents against 30-case evaluation test suites (`tests/skill_eval/test_cases/*_30.json`), then scan outputs with `tests/compliance_tests/blacklist_scanner.py --scan-dir <output_dir>` (target ≥ 4/5 quality, 0% prohibited term leaks)
 
 ## Two-Pillar Knowledge Architecture
 
@@ -155,8 +156,19 @@ long-term-care-expert/
 │   └── disclaimer_template.md
 └── tests/
     ├── routing_accuracy/
+    │   └── test_cases_100.json
     ├── skill_eval/
-    └── compliance_tests/
+    │   └── test_cases/          # 30-case eval suites per L2 Skill
+    │       ├── sleep_pattern_expert_30.json
+    │       ├── mobility_fall_expert_30.json
+    │       ├── dementia_behavior_expert_30.json
+    │       ├── chronic_disease_observer_30.json
+    │       └── weekly_summary_composer_30.json
+    ├── compliance_tests/
+    │   ├── blacklist_scanner.py  # Automated compliance scanner (CLI + module)
+    │   └── test_blacklist_scanner.py  # 40 unit tests
+    ├── rag_eval/
+    └── test_baseline_manager.py
 ```
 
 ## Architecture: Two-Layer Agent System

@@ -239,7 +239,14 @@ class ComplianceScanner:
     def _find_violations(
         self, text: str, field_name: str
     ) -> list[Violation]:
-        """Scan *text* for prohibited terms and patterns."""
+        """Scan *text* for prohibited terms and patterns.
+
+        Uses substring matching (not word-boundary matching) to match the
+        STRICT enforcement level defined in ``blacklist_terms.json`` and
+        the behavior of ``line_report_generator._scan_text()``.  This means
+        "treated" will match the "treat" term — intentional for SaMD
+        zero-tolerance compliance.
+        """
         violations: list[Violation] = []
         lower = text.lower()
 
