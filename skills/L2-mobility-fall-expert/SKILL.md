@@ -149,6 +149,11 @@ Even in urgent mode, you MUST call `search_hpa_guidelines`:
 
 This provides HPA-grounded guidance for the family's response.
 
+If the RAG results are insufficient or irrelevant, call `search_hpa_guidelines`
+a second time with a rephrased query (e.g., `"senior fall prevention home
+environment hazard check bathroom bedroom"`). If results remain insufficient
+after two attempts, proceed with whatever relevant content was retrieved.
+
 #### 5b — Compose Urgent Report
 
 Follow these **non-negotiable rules** for sudden_drop:
