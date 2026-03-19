@@ -1,0 +1,1013 @@
+{
+  "metadata": {
+    "skill": "chronic-disease-observer",
+    "version": "1.0.0",
+    "total_cases": 30,
+    "evaluation_target": "≥ 4/5 quality per case",
+    "description": "30-case evaluation suite for L2 chronic-disease-observer skill. This skill receives weekly aggregation data with alert_class lifestyle_regularity, calls search_hpa_guidelines (category: chronic_disease_lifestyle, exclude_medical: true), and outputs structured JSON for weekly-summary-composer. It does NOT call generate_line_report.",
+    "categories": {
+      "activity_decrease_mild": "4 cases — 20-30% WoW decrease",
+      "activity_decrease_moderate": "3 cases — 30-40% WoW decrease",
+      "activity_decrease_severe": "2 cases — 40%+ WoW decrease",
+      "activity_stable": "4 cases — stable activity (±10%)",
+      "activity_increase": "3 cases — activity increasing",
+      "schedule_disrupted": "4 cases — regularity score < 0.6",
+      "schedule_shifting": "3 cases — regularity score 0.6-0.8",
+      "combined_decrease_disrupted": "3 cases — both activity down and schedule disrupted",
+      "boundary_cases": "2 cases — exactly 20% decrease (threshold edge)",
+      "compliance_edge": "2 cases — scenarios tempting chronic disease naming"
+    }
+  },
+  "test_cases": [
+    {
+      "test_id": 1,
+      "description": "25% weekly activity decrease with consistent schedule — mild reduction",
+      "category": "activity_decrease_mild",
+      "routing_payload": {
+        "user_id": "anon_user_601",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 980,
+          "avg_daily_activity_minutes": 35,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.55,
+            "evening_activity_ratio": 0.30
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -25.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.88
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm description noting activity levels have been somewhat lower this week; HPA suggestion about staying gently active",
+        "output_must_not_contain": "Raw percentage decrease or clinical terminology"
+      }
+    },
+    {
+      "test_id": 2,
+      "description": "22% weekly activity decrease primarily in evening hours",
+      "category": "activity_decrease_mild",
+      "routing_payload": {
+        "user_id": "anon_user_602",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1100,
+          "avg_daily_activity_minutes": 40,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.65,
+            "evening_activity_ratio": 0.15
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -22.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.82
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm observation about reduced evening activity; HPA suggestion about gentle evening routines",
+        "output_must_not_contain": "Specific percentage numbers or medical language"
+      }
+    },
+    {
+      "test_id": 3,
+      "description": "28% weekly activity decrease with morning routines still strong",
+      "category": "activity_decrease_mild",
+      "routing_payload": {
+        "user_id": "anon_user_603",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 870,
+          "avg_daily_activity_minutes": 32,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.70,
+            "evening_activity_ratio": 0.10
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -28.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.91
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Positive note about maintained morning routines alongside observation of overall lower activity; HPA-grounded suggestion",
+        "output_must_not_contain": "Clinical assessment or raw data exposure"
+      }
+    },
+    {
+      "test_id": 4,
+      "description": "23% weekly decrease but second consecutive week of decline",
+      "category": "activity_decrease_mild",
+      "routing_payload": {
+        "user_id": "anon_user_604",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 920,
+          "avg_daily_activity_minutes": 33,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.50,
+            "evening_activity_ratio": 0.25
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -23.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.85
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm mention that activity has been gradually lower over recent weeks; is_continuing_trend should be true; HPA suggestion",
+        "output_must_not_contain": "Multi-week statistical analysis or disease risk language"
+      }
+    },
+    {
+      "test_id": 5,
+      "description": "35% weekly activity decrease — moderate reduction with preserved schedule",
+      "category": "activity_decrease_moderate",
+      "routing_payload": {
+        "user_id": "anon_user_605",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 780,
+          "avg_daily_activity_minutes": 28,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.55,
+            "evening_activity_ratio": 0.20
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -35.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.83
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm observation about noticeably lower activity volume this week; positive note about maintained daily routine; HPA suggestion",
+        "output_must_not_contain": "Clinical terms or numeric thresholds"
+      }
+    },
+    {
+      "test_id": 6,
+      "description": "32% decrease concentrated in afternoon hours",
+      "category": "activity_decrease_moderate",
+      "routing_payload": {
+        "user_id": "anon_user_606",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 810,
+          "avg_daily_activity_minutes": 29,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.60,
+            "evening_activity_ratio": 0.25
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -32.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.79
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Qualitative note about quieter afternoons; HPA lifestyle suggestion about staying engaged",
+        "output_must_not_contain": "Specific hour-by-hour data or medical rationale"
+      }
+    },
+    {
+      "test_id": 7,
+      "description": "38% decrease — approaching severe threshold, morning-heavy pattern",
+      "category": "activity_decrease_moderate",
+      "routing_payload": {
+        "user_id": "anon_user_607",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 740,
+          "avg_daily_activity_minutes": 26,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.72,
+            "evening_activity_ratio": 0.08
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -38.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.81
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm note about significantly less movement this week with positive mention of morning habits; HPA-grounded suggestion",
+        "output_must_not_contain": "Alarm language, clinical concern framing, or raw threshold values"
+      }
+    },
+    {
+      "test_id": 8,
+      "description": "45% weekly activity decrease — severe drop, first week",
+      "category": "activity_decrease_severe",
+      "routing_payload": {
+        "user_id": "anon_user_608",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 620,
+          "avg_daily_activity_minutes": 22,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.45,
+            "evening_activity_ratio": 0.15
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -45.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.72
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "shifting",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm observation about noticeably quieter week; gentle note about schedule shifting slightly; HPA suggestion about daily movement",
+        "output_must_not_contain": "Alarming language about health decline or disease risk"
+      }
+    },
+    {
+      "test_id": 9,
+      "description": "55% weekly activity decrease — severe and sustained over 2 weeks",
+      "category": "activity_decrease_severe",
+      "routing_payload": {
+        "user_id": "anon_user_609",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 510,
+          "avg_daily_activity_minutes": 18,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.40,
+            "evening_activity_ratio": 0.10
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -55.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.58
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm but clear observation about much quieter activity and less regular routines; is_continuing_trend true; HPA suggestion encouraging gentle daily activity",
+        "output_must_not_contain": "Deconditioning risk language, clinical framing, or urgency escalation"
+      }
+    },
+    {
+      "test_id": 10,
+      "description": "Stable activity — 3% increase with strong schedule",
+      "category": "activity_stable",
+      "routing_payload": {
+        "user_id": "anon_user_610",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1320,
+          "avg_daily_activity_minutes": 47,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.55,
+            "evening_activity_ratio": 0.30
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": 3.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.93
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Positive observation celebrating consistency and good routine; HPA suggestion reinforcing current habits",
+        "output_must_not_contain": "Any concern language or negative framing"
+      }
+    },
+    {
+      "test_id": 11,
+      "description": "Stable activity — 5% decrease, within normal fluctuation",
+      "category": "activity_stable",
+      "routing_payload": {
+        "user_id": "anon_user_611",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1200,
+          "avg_daily_activity_minutes": 43,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.50,
+            "evening_activity_ratio": 0.35
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -5.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.90
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm note about steady week with normal variation; HPA suggestion about maintaining routines",
+        "output_must_not_contain": "Any mention of decrease or concern"
+      }
+    },
+    {
+      "test_id": 12,
+      "description": "Stable activity — zero change, perfectly consistent week",
+      "category": "activity_stable",
+      "routing_payload": {
+        "user_id": "anon_user_612",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1400,
+          "avg_daily_activity_minutes": 50,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.45,
+            "evening_activity_ratio": 0.40
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": 0.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.95
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Celebration of excellent consistency; HPA suggestion about continued active living",
+        "output_must_not_contain": "Negative observations or suggestions for change"
+      }
+    },
+    {
+      "test_id": 13,
+      "description": "Stable activity — 9% decrease, near boundary of ±10% stable range",
+      "category": "activity_stable",
+      "routing_payload": {
+        "user_id": "anon_user_613",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1150,
+          "avg_daily_activity_minutes": 41,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.60,
+            "evening_activity_ratio": 0.20
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -9.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.86
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm observation about a generally steady week; HPA lifestyle suggestion",
+        "output_must_not_contain": "Concern about decline or threshold language"
+      }
+    },
+    {
+      "test_id": 14,
+      "description": "15% activity increase — positive upward trend",
+      "category": "activity_increase",
+      "routing_payload": {
+        "user_id": "anon_user_614",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1500,
+          "avg_daily_activity_minutes": 54,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.50,
+            "evening_activity_ratio": 0.35
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": 15.0,
+          "direction": "increasing"
+        },
+        "schedule_regularity_score": 0.89
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "increasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm celebration of increased activity; encouragement to keep it up; HPA suggestion reinforcing benefits of active living",
+        "output_must_not_contain": "Warnings about overexertion or clinical language"
+      }
+    },
+    {
+      "test_id": 15,
+      "description": "25% activity increase with balanced timing distribution",
+      "category": "activity_increase",
+      "routing_payload": {
+        "user_id": "anon_user_615",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1600,
+          "avg_daily_activity_minutes": 57,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.45,
+            "evening_activity_ratio": 0.40
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": 25.0,
+          "direction": "increasing"
+        },
+        "schedule_regularity_score": 0.92
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "increasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Positive observation about notably more active week; HPA suggestion about maintaining balanced activity",
+        "output_must_not_contain": "Clinical benefit language or exercise prescription"
+      }
+    },
+    {
+      "test_id": 16,
+      "description": "12% activity increase recovering from prior low week",
+      "category": "activity_increase",
+      "routing_payload": {
+        "user_id": "anon_user_616",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1350,
+          "avg_daily_activity_minutes": 48,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.55,
+            "evening_activity_ratio": 0.30
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": 12.0,
+          "direction": "increasing"
+        },
+        "schedule_regularity_score": 0.87
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "increasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm note about activity picking back up; gentle encouragement; HPA lifestyle suggestion",
+        "output_must_not_contain": "Recovery framing or clinical rehabilitation language"
+      }
+    },
+    {
+      "test_id": 17,
+      "description": "Schedule disrupted — regularity score 0.42, erratic timing",
+      "category": "schedule_disrupted",
+      "routing_payload": {
+        "user_id": "anon_user_617",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1100,
+          "avg_daily_activity_minutes": 39,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.30,
+            "evening_activity_ratio": 0.50
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -8.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.42
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder", "circadian"],
+        "output_should_contain": "Warm observation about daily routines being less predictable this week; HPA suggestion about establishing gentle daily rhythms",
+        "output_must_not_contain": "Clinical schedule disorder language or circadian terminology"
+      }
+    },
+    {
+      "test_id": 18,
+      "description": "Schedule disrupted — regularity score 0.35, reversed day/night pattern",
+      "category": "schedule_disrupted",
+      "routing_payload": {
+        "user_id": "anon_user_618",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1050,
+          "avg_daily_activity_minutes": 38,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.20,
+            "evening_activity_ratio": 0.60
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -3.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.35
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder", "circadian", "insomnia"],
+        "output_should_contain": "Warm note about activity timing shifting toward later in the day; HPA suggestion about morning light and routine",
+        "output_must_not_contain": "Sleep disorder language or day-night reversal clinical framing"
+      }
+    },
+    {
+      "test_id": 19,
+      "description": "Schedule disrupted — regularity score 0.50, inconsistent day-to-day timing",
+      "category": "schedule_disrupted",
+      "routing_payload": {
+        "user_id": "anon_user_619",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1180,
+          "avg_daily_activity_minutes": 42,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.40,
+            "evening_activity_ratio": 0.35
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": 2.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.50
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm observation that daily patterns varied quite a bit this week; HPA suggestion about consistent mealtimes or walk times",
+        "output_must_not_contain": "Clinical language about routine disruption or behavioral symptoms"
+      }
+    },
+    {
+      "test_id": 20,
+      "description": "Schedule disrupted — regularity score 0.55, activity volume fine but timing scattered",
+      "category": "schedule_disrupted",
+      "routing_payload": {
+        "user_id": "anon_user_620",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1300,
+          "avg_daily_activity_minutes": 46,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.35,
+            "evening_activity_ratio": 0.45
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": 5.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.55
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Positive note about good activity volume while warmly observing timing was less regular; HPA suggestion about daily rhythm",
+        "output_must_not_contain": "Concern framing or disease correlation"
+      }
+    },
+    {
+      "test_id": 21,
+      "description": "Schedule shifting — regularity score 0.68, gradually moving to later timing",
+      "category": "schedule_shifting",
+      "routing_payload": {
+        "user_id": "anon_user_621",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1200,
+          "avg_daily_activity_minutes": 43,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.38,
+            "evening_activity_ratio": 0.42
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -2.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.68
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "shifting",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Gentle observation about daily timing gradually changing; HPA suggestion about anchoring one daily activity at a consistent time",
+        "output_must_not_contain": "Clinical pattern shift analysis or medical concern"
+      }
+    },
+    {
+      "test_id": 22,
+      "description": "Schedule shifting — regularity score 0.75, mild inconsistency",
+      "category": "schedule_shifting",
+      "routing_payload": {
+        "user_id": "anon_user_622",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1250,
+          "avg_daily_activity_minutes": 45,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.48,
+            "evening_activity_ratio": 0.32
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -6.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.75
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "shifting",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Light observation that routines shifted a bit this week; HPA suggestion about gentle consistency",
+        "output_must_not_contain": "Concern language or clinical assessment"
+      }
+    },
+    {
+      "test_id": 23,
+      "description": "Schedule shifting — regularity score 0.62, near boundary of disrupted",
+      "category": "schedule_shifting",
+      "routing_payload": {
+        "user_id": "anon_user_623",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1100,
+          "avg_daily_activity_minutes": 39,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.42,
+            "evening_activity_ratio": 0.38
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -11.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.62
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "shifting",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm observation about somewhat less regular routines; HPA suggestion about enjoyable daily anchors like meals or walks",
+        "output_must_not_contain": "Disruption severity language or clinical framing"
+      }
+    },
+    {
+      "test_id": 24,
+      "description": "Combined: 30% activity decrease with disrupted schedule (score 0.45)",
+      "category": "combined_decrease_disrupted",
+      "routing_payload": {
+        "user_id": "anon_user_624",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 750,
+          "avg_daily_activity_minutes": 27,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.30,
+            "evening_activity_ratio": 0.40
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -30.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.45
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder", "deconditioning"],
+        "output_should_contain": "Warm observation about both less activity and less regular routines; HPA suggestion focusing on one small consistent daily activity",
+        "output_must_not_contain": "Compounding risk language, clinical assessment, or alarming framing"
+      }
+    },
+    {
+      "test_id": 25,
+      "description": "Combined: 40% activity decrease with disrupted schedule (score 0.38), continuing trend",
+      "category": "combined_decrease_disrupted",
+      "routing_payload": {
+        "user_id": "anon_user_625",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 580,
+          "avg_daily_activity_minutes": 21,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.25,
+            "evening_activity_ratio": 0.35
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -40.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.38
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder", "deconditioning"],
+        "output_should_contain": "Warm but clear observation about significantly quieter and less regular week; is_continuing_trend true; HPA suggestion about gentle daily rhythm",
+        "output_must_not_contain": "Health deterioration language, risk assessment, or urgency escalation"
+      }
+    },
+    {
+      "test_id": 26,
+      "description": "Combined: 25% activity decrease with shifting schedule (score 0.58)",
+      "category": "combined_decrease_disrupted",
+      "routing_payload": {
+        "user_id": "anon_user_626",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 900,
+          "avg_daily_activity_minutes": 32,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.35,
+            "evening_activity_ratio": 0.40
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -25.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.58
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Warm observation linking lower activity and shifting routines; HPA suggestion about small consistent habits",
+        "output_must_not_contain": "Combined risk factor analysis or clinical pattern recognition language"
+      }
+    },
+    {
+      "test_id": 27,
+      "description": "Boundary: exactly 20% weekly decrease — activation threshold edge",
+      "category": "boundary_cases",
+      "routing_payload": {
+        "user_id": "anon_user_627",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1000,
+          "avg_daily_activity_minutes": 36,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.55,
+            "evening_activity_ratio": 0.30
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -20.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.85
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "consistent",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Mild warm observation about slightly lower activity this week; HPA suggestion about gentle daily movement",
+        "output_must_not_contain": "Threshold language, boundary terminology, or minimum-trigger framing"
+      }
+    },
+    {
+      "test_id": 28,
+      "description": "Boundary: regularity score exactly 0.60 — shifting/disrupted boundary",
+      "category": "boundary_cases",
+      "routing_payload": {
+        "user_id": "anon_user_628",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 1150,
+          "avg_daily_activity_minutes": 41,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.40,
+            "evening_activity_ratio": 0.35
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -5.0,
+          "direction": "stable"
+        },
+        "schedule_regularity_score": 0.60
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "stable",
+        "expected_schedule_status": "shifting",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder"],
+        "output_should_contain": "Gentle observation about routines being a bit variable; HPA suggestion about one consistent daily anchor",
+        "output_must_not_contain": "Boundary threshold language or clinical classification"
+      }
+    },
+    {
+      "test_id": 29,
+      "description": "Compliance edge: severe decrease tempting 'sedentary lifestyle' or 'cardiovascular risk' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_629",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 400,
+          "avg_daily_activity_minutes": 14,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.30,
+            "evening_activity_ratio": 0.15
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -60.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.40
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder", "deconditioning", "atrophy", "muscle wasting", "sarcopenia"],
+        "output_should_contain": "Warm observation about a very quiet week without using clinical terminology; HPA suggestion about small enjoyable activities; must remain observational",
+        "output_must_not_contain": "Any disease name, risk factor analysis, sedentary lifestyle warnings, or health consequence predictions"
+      }
+    },
+    {
+      "test_id": 30,
+      "description": "Compliance edge: chronic low activity tempting 'diabetes risk' or 'metabolic' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_630",
+        "alert_class": "lifestyle_regularity",
+        "weekly_activity_summary": {
+          "total_activity_count": 350,
+          "avg_daily_activity_minutes": 12,
+          "timing_patterns": {
+            "morning_activity_ratio": 0.25,
+            "evening_activity_ratio": 0.20
+          }
+        },
+        "prior_week_comparison": {
+          "week_over_week_change_percent": -15.0,
+          "direction": "decreasing"
+        },
+        "schedule_regularity_score": 0.48
+      },
+      "expected_behavior": {
+        "source_skill": "chronic-disease-observer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": false,
+        "output_type": "structured_json_for_composer",
+        "expected_activity_trend_direction": "decreasing",
+        "expected_schedule_status": "disrupted",
+        "prohibited_terms_in_output": ["diabetes", "hypertension", "cardiovascular", "risk factor", "sedentary", "diagnosis", "treatment", "disease", "disorder", "metabolic", "blood sugar", "glucose", "obesity", "cholesterol"],
+        "output_should_contain": "Warm and non-judgmental observation about continued low activity without implying disease risk; HPA-grounded suggestion about enjoyable gentle movement",
+        "output_must_not_contain": "Metabolic risk language, disease prevention framing, or any implication of health consequences from inactivity"
+      }
+    }
+  ]
+}

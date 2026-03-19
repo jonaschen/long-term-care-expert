@@ -1,0 +1,1227 @@
+{
+  "metadata": {
+    "skill": "weekly-summary-composer",
+    "version": "1.0.0",
+    "total_cases": 30,
+    "evaluation_target": "≥ 4/5 quality per case",
+    "description": "30-case evaluation suite for L2 weekly-summary-composer skill. This skill aggregates all L2 domain observations into one warm weekly report. Calls search_hpa_guidelines (up to 3 calls, various categories, exclude_medical: true). Always calls generate_line_report. Output is urgency_level routine, report_type weekly_summary.",
+    "categories": {
+      "quiet_week": "5 cases — all domains stable, celebrate stability",
+      "sleep_theme_week": "3 cases — sleep observations present, others stable",
+      "mobility_theme_week": "3 cases — mobility observations present, others stable",
+      "cognitive_theme_week": "3 cases — cognitive observations present, others stable",
+      "activity_theme_week": "2 cases — activity decrease observed",
+      "multi_domain": "4 cases — multiple domains have observations",
+      "all_domains_active": "2 cases — all domains have observations",
+      "positive_trend": "3 cases — improving trends across domains",
+      "deduplication": "2 cases — daily reports already sent this week",
+      "compliance_edge": "3 cases — scenarios tempting clinical language"
+    }
+  },
+  "test_cases": [
+    {
+      "test_id": 1,
+      "description": "Perfectly quiet week — all domains stable, no anomalies at all",
+      "category": "quiet_week",
+      "routing_payload": {
+        "user_id": "anon_user_701",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Activity levels remained consistent throughout the week"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Warm celebration of a peaceful and consistent week; encouragement to maintain routines; at least one HPA-grounded general wellness suggestion",
+        "output_must_not_contain": "Any concern language or negative observations; no mention of absence of problems"
+      }
+    },
+    {
+      "test_id": 2,
+      "description": "Quiet week with good activity and consistent schedule — second consecutive stable week",
+      "category": "quiet_week",
+      "routing_payload": {
+        "user_id": "anon_user_702",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Consistent daily activity levels matching the prior week"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Warm recognition of continued stability across weeks; HPA suggestion about enjoyable activities or social engagement",
+        "output_must_not_contain": "Repetitive phrasing from prior week or clinical language"
+      }
+    },
+    {
+      "test_id": 3,
+      "description": "Quiet week — stable with slightly increased activity, no concerns",
+      "category": "quiet_week",
+      "routing_payload": {
+        "user_id": "anon_user_703",
+        "week_start": "2026-03-24",
+        "week_end": "2026-03-30",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "increasing",
+            "description": "Activity levels gently increased compared to last week"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Positive highlight of increased activity; warm encouragement; HPA suggestion reinforcing active living",
+        "output_must_not_contain": "Concern language or warnings about overexertion"
+      }
+    },
+    {
+      "test_id": 4,
+      "description": "Quiet week — first weekly summary for new user (no prior summary)",
+      "category": "quiet_week",
+      "routing_payload": {
+        "user_id": "anon_user_704",
+        "week_start": "2026-04-07",
+        "week_end": "2026-04-13",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Activity levels are establishing a consistent baseline"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Welcoming tone for first report; warm introduction of weekly observation pattern; HPA general wellness suggestion",
+        "output_must_not_contain": "References to prior weeks that do not exist; clinical baseline language"
+      }
+    },
+    {
+      "test_id": 5,
+      "description": "Quiet week — schedule slightly shifting but all else stable",
+      "category": "quiet_week",
+      "routing_payload": {
+        "user_id": "anon_user_705",
+        "week_start": "2026-04-14",
+        "week_end": "2026-04-20",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Activity volume remained consistent"
+          },
+          "schedule_regularity": {
+            "status": "shifting"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Lead with positive stable activity; gentle mention of schedule variability; HPA suggestion about daily rhythm anchors",
+        "output_must_not_contain": "Over-emphasis on schedule change or clinical language"
+      }
+    },
+    {
+      "test_id": 6,
+      "description": "Sleep theme — elevated bed exits observed, others stable",
+      "category": "sleep_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_706",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Elevated nighttime bed exits observed on 3 of 7 nights"
+        },
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Daytime activity remained consistent"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "sleep disorder"],
+        "output_should_contain": "Lead with positive daytime stability; warm mention of more nighttime activity; HPA sleep hygiene suggestion; family engagement prompt about evening routine",
+        "output_must_not_contain": "Clinical sleep assessment or disorder naming"
+      }
+    },
+    {
+      "test_id": 7,
+      "description": "Sleep theme — tossing and turning observed, mild disruption",
+      "category": "sleep_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_707",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Extended restless periods during sleep on several nights"
+        },
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Daily activity levels were typical"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "sleep apnea"],
+        "output_should_contain": "Positive note about daytime consistency; warm observation about restless nights; HPA suggestion about sleep environment; family prompt",
+        "output_must_not_contain": "Clinical sleep terminology or disorder speculation"
+      }
+    },
+    {
+      "test_id": 8,
+      "description": "Sleep theme — sleep observation present but stable trend",
+      "category": "sleep_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_708",
+        "week_start": "2026-03-24",
+        "week_end": "2026-03-30",
+        "sleep_observations": {
+          "trend": "stable",
+          "details": "Sleep patterns were generally consistent with minor variations"
+        },
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "No significant activity changes"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Warm celebration of stable sleep patterns; positive overall week summary; HPA general wellness suggestion",
+        "output_must_not_contain": "Unnecessary concern about minor sleep variations"
+      }
+    },
+    {
+      "test_id": 9,
+      "description": "Mobility theme — gait slowing observed, others stable",
+      "category": "mobility_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_709",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": null,
+        "mobility_observations": {
+          "trend": "declining",
+          "details": "Walking pace has been noticeably slower on multiple days"
+        },
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Overall activity volume was typical"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "fall risk"],
+        "output_should_contain": "Lead with positive schedule consistency; warm observation about slower walking pace; HPA fall prevention suggestion; family prompt about walking environment",
+        "output_must_not_contain": "Clinical gait assessment, fall risk scoring, or sarcopenia language"
+      }
+    },
+    {
+      "test_id": 10,
+      "description": "Mobility theme — rise attempt difficulties noted",
+      "category": "mobility_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_710",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": null,
+        "mobility_observations": {
+          "trend": "declining",
+          "details": "Some difficulty observed when getting up from seated positions"
+        },
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Activity levels remained within normal range"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "muscle weakness"],
+        "output_should_contain": "Positive mention of consistent activity; warm observation about rising difficulties; HPA suggestion about home environment safety and handrails",
+        "output_must_not_contain": "Clinical muscle assessment or rehabilitation language"
+      }
+    },
+    {
+      "test_id": 11,
+      "description": "Mobility theme — stable mobility trend, minor observation only",
+      "category": "mobility_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_711",
+        "week_start": "2026-03-24",
+        "week_end": "2026-03-30",
+        "sleep_observations": null,
+        "mobility_observations": {
+          "trend": "stable",
+          "details": "Movement patterns remained consistent with baseline"
+        },
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Consistent daily activity"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Celebration of consistent movement patterns; HPA suggestion about maintaining gentle daily activity",
+        "output_must_not_contain": "Negative framing or unnecessary mobility concern"
+      }
+    },
+    {
+      "test_id": 12,
+      "description": "Cognitive theme — nighttime wandering pattern observed",
+      "category": "cognitive_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_712",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": {
+          "trend": "concerning",
+          "details": "Unusual movement during late-night hours on 2 occasions"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Daytime activity levels were normal"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "cognitive decline", "wandering"],
+        "output_should_contain": "Lead with positive daytime consistency; warm observation about unusual nighttime movement; HPA suggestion about safe nighttime environment; family prompt about evening check-in",
+        "output_must_not_contain": "Dementia terminology, cognitive decline language, or wandering as clinical term"
+      }
+    },
+    {
+      "test_id": 13,
+      "description": "Cognitive theme — prolonged inactivity periods noted",
+      "category": "cognitive_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_713",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": {
+          "trend": "concerning",
+          "details": "Extended periods of stillness during daytime hours on 3 days"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Activity levels lower than usual this week"
+          },
+          "schedule_regularity": {
+            "status": "shifting"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "apathy", "depression"],
+        "output_should_contain": "Find a positive to lead with; warm observation about quieter daytime periods; HPA suggestion about gentle engagement activities; family prompt encouraging visits or calls",
+        "output_must_not_contain": "Clinical inactivity assessment, apathy language, or depression terminology"
+      }
+    },
+    {
+      "test_id": 14,
+      "description": "Cognitive theme — stable cognitive observations, monitoring only",
+      "category": "cognitive_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_714",
+        "week_start": "2026-03-24",
+        "week_end": "2026-03-30",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": {
+          "trend": "stable",
+          "details": "Behavioral patterns consistent with established routines"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Activity was typical"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Warm celebration of consistent behavioral patterns; HPA suggestion about brain-healthy activities like social interaction",
+        "output_must_not_contain": "Clinical cognitive language or unnecessary concern"
+      }
+    },
+    {
+      "test_id": 15,
+      "description": "Activity theme — moderate decrease in weekly activity",
+      "category": "activity_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_715",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Activity levels were noticeably lower than usual"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "sedentary"],
+        "output_should_contain": "Lead with positive (consistent schedule); warm observation about quieter activity week; HPA suggestion about enjoyable daily movement; family engagement prompt",
+        "output_must_not_contain": "Sedentary lifestyle language, disease risk framing, or clinical assessment"
+      }
+    },
+    {
+      "test_id": 16,
+      "description": "Activity theme — activity decrease with disrupted schedule",
+      "category": "activity_theme_week",
+      "routing_payload": {
+        "user_id": "anon_user_716",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Activity levels dropped compared to prior week"
+          },
+          "schedule_regularity": {
+            "status": "disrupted"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "sedentary"],
+        "output_should_contain": "Find a positive to lead with; warm note about lower activity and less regular routines; HPA suggestion about gentle daily anchors; family prompt about shared activities",
+        "output_must_not_contain": "Compounding risk language or clinical concern framing"
+      }
+    },
+    {
+      "test_id": 17,
+      "description": "Multi-domain — sleep disruption and mobility decline together",
+      "category": "multi_domain",
+      "routing_payload": {
+        "user_id": "anon_user_717",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Multiple nighttime awakenings observed"
+        },
+        "mobility_observations": {
+          "trend": "declining",
+          "details": "Gait speed has decreased compared to the usual pattern"
+        },
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Overall activity somewhat reduced"
+          },
+          "schedule_regularity": {
+            "status": "shifting"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "comorbidity", "fall risk"],
+        "output_should_contain": "Lead with a positive; address sleep and mobility as separate warm observations; HPA suggestions for both domains; family engagement prompt about nighttime and movement safety",
+        "output_must_not_contain": "Cross-domain clinical correlation, comorbidity language, or medical causal reasoning"
+      }
+    },
+    {
+      "test_id": 18,
+      "description": "Multi-domain — cognitive concern and activity decrease",
+      "category": "multi_domain",
+      "routing_payload": {
+        "user_id": "anon_user_718",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": {
+          "trend": "concerning",
+          "details": "Unusual late-night movement and extended daytime stillness observed"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Activity levels were lower than usual"
+          },
+          "schedule_regularity": {
+            "status": "disrupted"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "cognitive decline", "neurological"],
+        "output_should_contain": "Find a positive; warm observations about activity and behavioral patterns; HPA suggestions about engagement and daily rhythm; gentle family prompt",
+        "output_must_not_contain": "Clinical cognitive-activity correlation, dementia screening language, or neurological terminology"
+      }
+    },
+    {
+      "test_id": 19,
+      "description": "Multi-domain — sleep and cognitive observations both present",
+      "category": "multi_domain",
+      "routing_payload": {
+        "user_id": "anon_user_719",
+        "week_start": "2026-03-24",
+        "week_end": "2026-03-30",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Elevated bed exits on several nights"
+        },
+        "mobility_observations": null,
+        "cognitive_observations": {
+          "trend": "concerning",
+          "details": "Brief episodes of unusual late-night activity noted"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Daytime activity levels normal"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "sundowning"],
+        "output_should_contain": "Lead with stable daytime pattern; address nighttime observations warmly without conflating sleep and cognitive; HPA suggestions; family prompt about nighttime safety",
+        "output_must_not_contain": "Sundowning terminology, sleep-cognition medical correlation, or clinical pattern analysis"
+      }
+    },
+    {
+      "test_id": 20,
+      "description": "Multi-domain — mobility and activity both declining",
+      "category": "multi_domain",
+      "routing_payload": {
+        "user_id": "anon_user_720",
+        "week_start": "2026-04-07",
+        "week_end": "2026-04-13",
+        "sleep_observations": null,
+        "mobility_observations": {
+          "trend": "declining",
+          "details": "Walking patterns slower than the usual pace"
+        },
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Activity volume noticeably lower"
+          },
+          "schedule_regularity": {
+            "status": "shifting"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "deconditioning", "frailty"],
+        "output_should_contain": "Find a positive; warm observations about both slower movement and lower activity as separate points; HPA suggestions about gentle exercise and home safety",
+        "output_must_not_contain": "Deconditioning or frailty language; clinical mobility-activity cascade reasoning"
+      }
+    },
+    {
+      "test_id": 21,
+      "description": "All domains active — sleep disrupted, mobility declining, cognitive concerning, activity down",
+      "category": "all_domains_active",
+      "routing_payload": {
+        "user_id": "anon_user_721",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Frequent nighttime awakenings observed"
+        },
+        "mobility_observations": {
+          "trend": "declining",
+          "details": "Walking pace reduced and some rise difficulties observed"
+        },
+        "cognitive_observations": {
+          "trend": "concerning",
+          "details": "Unusual late-night movement and extended daytime quiet periods"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Activity levels were notably lower"
+          },
+          "schedule_regularity": {
+            "status": "disrupted"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "deterioration", "decline"],
+        "output_should_contain": "Must still lead with something positive; 2-3 prioritized themes (not all 4); HPA suggestions for top concerns; if this continues suggest consulting a professional; warm family prompt",
+        "output_must_not_contain": "Overwhelming list of all issues; clinical deterioration language; multi-system failure framing"
+      }
+    },
+    {
+      "test_id": 22,
+      "description": "All domains active — all concerning but with some positive elements to highlight",
+      "category": "all_domains_active",
+      "routing_payload": {
+        "user_id": "anon_user_722",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Sleep restlessness on most nights"
+        },
+        "mobility_observations": {
+          "trend": "declining",
+          "details": "Slower movement patterns compared to usual"
+        },
+        "cognitive_observations": {
+          "trend": "concerning",
+          "details": "Prolonged inactivity periods during daytime"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Continued lower activity volume"
+          },
+          "schedule_regularity": {
+            "status": "disrupted"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": true
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "worsening", "deterioration"],
+        "output_should_contain": "Find positive to lead with; prioritize 2-3 themes; reference prior week context; gentle suggestion to consult professional if patterns continue; warm family prompt",
+        "output_must_not_contain": "Escalation language, worsening trajectory framing, or overwhelming concern list"
+      }
+    },
+    {
+      "test_id": 23,
+      "description": "Positive trend — activity increasing, sleep improving",
+      "category": "positive_trend",
+      "routing_payload": {
+        "user_id": "anon_user_723",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": {
+          "trend": "stable",
+          "details": "Sleep patterns have returned to a consistent rhythm"
+        },
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "increasing",
+            "description": "Activity levels gently increased compared to last week"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": true
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Celebratory tone about improvements; warm note about sleep stability and increased activity; HPA suggestion reinforcing positive habits; encouraging family prompt",
+        "output_must_not_contain": "Clinical recovery language or before/after medical framing"
+      }
+    },
+    {
+      "test_id": 24,
+      "description": "Positive trend — mobility stable after prior concern, activity recovering",
+      "category": "positive_trend",
+      "routing_payload": {
+        "user_id": "anon_user_724",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": null,
+        "mobility_observations": {
+          "trend": "stable",
+          "details": "Movement patterns consistent and steady this week"
+        },
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "increasing",
+            "description": "Activity picking back up nicely"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": true
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "rehabilitation"],
+        "output_should_contain": "Lead with positive improvement; warm celebration of stable mobility and increased activity; HPA suggestion about continuing good habits; family prompt",
+        "output_must_not_contain": "Rehabilitation terminology or clinical improvement metrics"
+      }
+    },
+    {
+      "test_id": 25,
+      "description": "Positive trend — all domains improving from prior concerning week",
+      "category": "positive_trend",
+      "routing_payload": {
+        "user_id": "anon_user_725",
+        "week_start": "2026-03-24",
+        "week_end": "2026-03-30",
+        "sleep_observations": {
+          "trend": "stable",
+          "details": "Sleep has settled into a comfortable pattern"
+        },
+        "mobility_observations": {
+          "trend": "stable",
+          "details": "Movement patterns are looking good"
+        },
+        "cognitive_observations": {
+          "trend": "stable",
+          "details": "Behavioral patterns consistent with normal routines"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "increasing",
+            "description": "More active and engaged this week"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": true
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "recovery", "remission"],
+        "output_should_contain": "Warm celebration of an excellent week; note stability across all domains; HPA suggestion about maintaining positive momentum; encouraging family prompt",
+        "output_must_not_contain": "Clinical recovery language, remission terminology, or before/after comparisons"
+      }
+    },
+    {
+      "test_id": 26,
+      "description": "Deduplication — daily sleep report already sent mid-week",
+      "category": "deduplication",
+      "routing_payload": {
+        "user_id": "anon_user_726",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Elevated nighttime bed exits — daily insight already shared on Wednesday"
+        },
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Activity levels were typical"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": null,
+        "daily_reports_sent": [
+          {
+            "date": "2026-03-12",
+            "report_type": "daily_insight",
+            "source_skill": "sleep-pattern-expert",
+            "topic": "elevated_bed_exits"
+          }
+        ]
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Reference the earlier daily insight without repeating it; provide weekly context around the sleep observation; HPA suggestion different from daily report content",
+        "output_must_not_contain": "Full repeat of the daily insight content; clinical language"
+      }
+    },
+    {
+      "test_id": 27,
+      "description": "Deduplication — two daily reports sent this week (mobility + sleep)",
+      "category": "deduplication",
+      "routing_payload": {
+        "user_id": "anon_user_727",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Restless sleep pattern — daily insight shared earlier"
+        },
+        "mobility_observations": {
+          "trend": "declining",
+          "details": "Gait slowdown noted — daily insight shared earlier"
+        },
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "stable",
+            "description": "Activity was typical despite observations"
+          },
+          "schedule_regularity": {
+            "status": "consistent"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": [
+          {
+            "date": "2026-03-18",
+            "report_type": "daily_insight",
+            "source_skill": "sleep-pattern-expert",
+            "topic": "restless_sleep"
+          },
+          {
+            "date": "2026-03-20",
+            "report_type": "daily_insight",
+            "source_skill": "mobility-fall-expert",
+            "topic": "gait_slowdown"
+          }
+        ]
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication"],
+        "output_should_contain": "Brief reference to both daily insights shared this week; provide broader weekly perspective without repeating details; new HPA suggestions adding value beyond daily reports",
+        "output_must_not_contain": "Full repetition of daily report content; clinical language"
+      }
+    },
+    {
+      "test_id": 28,
+      "description": "Compliance edge — multi-domain observations tempting 'diagnosis' or 'disease' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_728",
+        "week_start": "2026-03-10",
+        "week_end": "2026-03-16",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Significant sleep fragmentation — multiple awakenings per night"
+        },
+        "mobility_observations": {
+          "trend": "declining",
+          "details": "Marked gait slowdown and difficulty rising from chair"
+        },
+        "cognitive_observations": {
+          "trend": "concerning",
+          "details": "Nighttime wandering and prolonged daytime inactivity"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Significant reduction in overall activity"
+          },
+          "schedule_regularity": {
+            "status": "disrupted"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": true
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "Parkinson's", "cognitive decline", "neurological", "degenerative"],
+        "output_should_contain": "MUST still lead with positive; prioritize 2-3 themes max; purely observational language; suggest consulting a professional if patterns continue; warm tone throughout",
+        "output_must_not_contain": "Any diagnostic pattern recognition; disease naming; multi-system clinical assessment; alarming or urgent language"
+      }
+    },
+    {
+      "test_id": 29,
+      "description": "Compliance edge — cognitive observations tempting 'dementia' or 'Alzheimer's' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_729",
+        "week_start": "2026-03-17",
+        "week_end": "2026-03-23",
+        "sleep_observations": null,
+        "mobility_observations": null,
+        "cognitive_observations": {
+          "trend": "concerning",
+          "details": "Repeated episodes of nighttime wandering, difficulty with familiar appliances, and extended periods of stillness during daytime"
+        },
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Activity has been lower this week"
+          },
+          "schedule_regularity": {
+            "status": "disrupted"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "cognitive decline", "memory loss", "confusion", "disorientation"],
+        "output_should_contain": "Lead with positive; describe observations in purely behavioral terms (movement patterns, quieter periods); gently suggest professional consultation if patterns continue; HPA suggestion about enriching daily environment",
+        "output_must_not_contain": "Any cognitive diagnosis terminology; dementia or Alzheimer's naming; confusion or disorientation language; clinical cognitive assessment framing"
+      }
+    },
+    {
+      "test_id": 30,
+      "description": "Compliance edge — sleep and activity decline tempting 'insomnia' or 'depression' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_730",
+        "week_start": "2026-03-24",
+        "week_end": "2026-03-30",
+        "sleep_observations": {
+          "trend": "disrupted",
+          "details": "Very fragmented sleep — frequent awakenings and long restless periods every night"
+        },
+        "mobility_observations": null,
+        "cognitive_observations": null,
+        "lifestyle_data": {
+          "activity_trend": {
+            "direction": "decreasing",
+            "description": "Daytime activity has been very low all week"
+          },
+          "schedule_regularity": {
+            "status": "disrupted"
+          }
+        },
+        "prior_weekly_summary": {
+          "had_attention_level_report": false
+        },
+        "daily_reports_sent": []
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "weekly_summary",
+        "source_skill": "weekly-summary-composer",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "should_lead_with_positive": true,
+        "prohibited_terms_in_output": ["diagnosis", "disease", "disorder", "dementia", "Alzheimer's", "insomnia", "sarcopenia", "treatment", "medication", "depression", "sleep disorder", "sleeping pills", "melatonin", "anxiety"],
+        "output_should_contain": "Lead with positive; warm observations about restless nights and quieter days as separate behavioral patterns; HPA sleep hygiene and daily activity suggestions; gentle note about consulting a professional if it continues; family prompt",
+        "output_must_not_contain": "Insomnia terminology; depression language; sleep-activity clinical correlation implying mental health condition; medication suggestions"
+      }
+    }
+  ]
+}

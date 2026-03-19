@@ -1,0 +1,1014 @@
+{
+  "metadata": {
+    "skill": "sleep-pattern-expert",
+    "version": "1.0.0",
+    "total_cases": 30,
+    "evaluation_target": "≥ 4/5 quality per case",
+    "categories": {
+      "bed_exit_basic": 5,
+      "bed_exit_boundary": 3,
+      "tossing_basic": 5,
+      "tossing_boundary": 2,
+      "combined": 5,
+      "multi_day_trend": 4,
+      "high_deviation": 3,
+      "compliance_edge": 3
+    }
+  },
+  "test_cases": [
+    {
+      "test_id": 1,
+      "description": "3 bed exits spread across the night — typical elevated pattern",
+      "category": "bed_exit_basic",
+      "routing_payload": {
+        "user_id": "anon_user_101",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-10T01:20:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-10T03:45:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-10T05:10:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.5,
+          "baseline_std_dev": 0.3,
+          "current_value": 3,
+          "deviation_sigma": 8.3,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit count elevated on 2 of past 3 nights (avg 3 vs baseline 0.5)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Warm mention of increased nighttime activity; concrete HPA sleep hygiene suggestion",
+        "output_must_not_contain": "Raw sensor counts or clinical language"
+      }
+    },
+    {
+      "test_id": 2,
+      "description": "4 bed exits clustered in early morning hours (03:00-06:00)",
+      "category": "bed_exit_basic",
+      "routing_payload": {
+        "user_id": "anon_user_102",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-11T03:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-11T03:55:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-11T05:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-11T05:40:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.8,
+          "baseline_std_dev": 0.4,
+          "current_value": 4,
+          "deviation_sigma": 8.0,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit count elevated on 2 of past 2 nights (avg 4 vs baseline 0.8)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Observation about early morning restlessness; suggestion about consistent wake time or bedroom environment",
+        "output_must_not_contain": "Clinical terminology or numeric sensor data"
+      }
+    },
+    {
+      "test_id": 3,
+      "description": "5 bed exits — highest typical count — spread across full night",
+      "category": "bed_exit_basic",
+      "routing_payload": {
+        "user_id": "anon_user_103",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-12T23:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-13T01:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-13T02:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-13T04:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-13T05:30:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 1.0,
+          "baseline_std_dev": 0.5,
+          "current_value": 5,
+          "deviation_sigma": 8.0,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit count elevated on 3 of past 3 nights (avg 5 vs baseline 1.0)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Warm phrasing about notably more frequent nighttime activity; HPA suggestion about sleep environment or routine",
+        "output_must_not_contain": "Raw count of 5 or clinical labels"
+      }
+    },
+    {
+      "test_id": 4,
+      "description": "2 bed exits late at night (23:00-01:00) for elderly who rarely gets up",
+      "category": "bed_exit_basic",
+      "routing_payload": {
+        "user_id": "anon_user_104",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-14T23:15:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-15T00:50:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.1,
+          "baseline_std_dev": 0.1,
+          "current_value": 2,
+          "deviation_sigma": 19.0,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit count elevated on 2 of past 3 nights (avg 2 vs baseline 0.1)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Noting this is unusual compared to elder's usual pattern; gentle suggestion about bedtime routine",
+        "output_must_not_contain": "Sigma values or statistical jargon"
+      }
+    },
+    {
+      "test_id": 5,
+      "description": "3 bed exits with moderate baseline deviation — mid-range scenario",
+      "category": "bed_exit_basic",
+      "routing_payload": {
+        "user_id": "anon_user_105",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-16T00:45:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-16T02:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-16T04:15:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 1.2,
+          "baseline_std_dev": 0.6,
+          "current_value": 3,
+          "deviation_sigma": 3.0,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit count mildly elevated on 2 of past 3 nights (avg 3 vs baseline 1.2)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Gentle note about slightly more activity than usual; practical HPA tip",
+        "output_must_not_contain": "Diagnostic language or alarm-like phrasing"
+      }
+    },
+    {
+      "test_id": 6,
+      "description": "Exactly 2 bed exits — threshold boundary, should be processed",
+      "category": "bed_exit_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_106",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-17T01:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-17T04:30:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.3,
+          "baseline_std_dev": 0.2,
+          "current_value": 2,
+          "deviation_sigma": 8.5,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit count at threshold on 2 of past 3 nights (avg 2 vs baseline 0.3)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Brief, warm mention of a couple of nighttime moments of activity; HPA hygiene suggestion",
+        "output_must_not_contain": "Threshold language or clinical framing"
+      }
+    },
+    {
+      "test_id": 7,
+      "description": "1 bed exit — below threshold but routed (L1 may still route if multi-day context); should process gracefully",
+      "category": "bed_exit_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_107",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-18T02:15:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.0,
+          "baseline_std_dev": 0.0,
+          "current_value": 1,
+          "deviation_sigma": null,
+          "is_anomalous": false
+        },
+        "trend_summary": "Single bed_exit tonight on a user with zero baseline — routed for context from prior nights"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Very gentle observation; general HPA sleep environment suggestion",
+        "output_must_not_contain": "Alarming language or statements implying something is wrong"
+      }
+    },
+    {
+      "test_id": 8,
+      "description": "Exactly 2 bed exits with very low deviation — just barely anomalous",
+      "category": "bed_exit_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_108",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-19T00:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-19T05:00:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 1.0,
+          "baseline_std_dev": 0.5,
+          "current_value": 2,
+          "deviation_sigma": 2.0,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit count at threshold boundary on 2 of past 3 nights (avg 2 vs baseline 1.0, deviation just at 2σ)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Soft observation about a minor change in nighttime pattern; proactive HPA tip",
+        "output_must_not_contain": "Deviation numbers or threshold references"
+      }
+    },
+    {
+      "test_id": 9,
+      "description": "35 minutes of tossing and turning — just above threshold",
+      "category": "tossing_basic",
+      "routing_payload": {
+        "user_id": "anon_user_109",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-20T01:30:00+08:00", "duration_minutes": 35}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 10.0,
+          "baseline_std_dev": 5.0,
+          "current_value": 35,
+          "deviation_sigma": 5.0,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning duration elevated on 2 of past 3 nights (avg 35 min vs baseline 10 min)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Observation about difficulty settling in; HPA suggestion about bedroom comfort or relaxation",
+        "output_must_not_contain": "Exact minutes or medical terminology"
+      }
+    },
+    {
+      "test_id": 10,
+      "description": "45 minutes of tossing mid-sleep — moderate restlessness",
+      "category": "tossing_basic",
+      "routing_payload": {
+        "user_id": "anon_user_110",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-21T03:00:00+08:00", "duration_minutes": 45}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 12.0,
+          "baseline_std_dev": 4.0,
+          "current_value": 45,
+          "deviation_sigma": 8.25,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning duration elevated on 2 of past 3 nights (avg 45 min vs baseline 12 min)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Warm mention of restless period during the night; HPA tip about sleep environment temperature or noise",
+        "output_must_not_contain": "Duration in minutes or clinical restlessness assessment"
+      }
+    },
+    {
+      "test_id": 11,
+      "description": "60 minutes of tossing — extended restlessness in late evening",
+      "category": "tossing_basic",
+      "routing_payload": {
+        "user_id": "anon_user_111",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-22T23:00:00+08:00", "duration_minutes": 60}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 8.0,
+          "baseline_std_dev": 3.0,
+          "current_value": 60,
+          "deviation_sigma": 17.3,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning duration significantly elevated on 2 of past 2 nights (avg 60 min vs baseline 8 min)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Caring note about difficulty settling into rest; HPA suggestion about pre-bedtime relaxation routine",
+        "output_must_not_contain": "Clinical assessment or alarmist language"
+      }
+    },
+    {
+      "test_id": 12,
+      "description": "40 minutes tossing in two separate episodes same night",
+      "category": "tossing_basic",
+      "routing_payload": {
+        "user_id": "anon_user_112",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-23T00:15:00+08:00", "duration_minutes": 25},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-23T04:00:00+08:00", "duration_minutes": 15}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 10.0,
+          "baseline_std_dev": 4.0,
+          "current_value": 40,
+          "deviation_sigma": 7.5,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning total duration elevated on 2 of past 3 nights (combined 40 min vs baseline 10 min)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Observation about multiple restless moments during the night; HPA bedding or room environment tip",
+        "output_must_not_contain": "Number of episodes or clinical terminology"
+      }
+    },
+    {
+      "test_id": 13,
+      "description": "50 minutes tossing with elder who has higher baseline tossing",
+      "category": "tossing_basic",
+      "routing_payload": {
+        "user_id": "anon_user_113",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-24T02:00:00+08:00", "duration_minutes": 50}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 20.0,
+          "baseline_std_dev": 8.0,
+          "current_value": 50,
+          "deviation_sigma": 3.75,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning duration elevated on 2 of past 3 nights (avg 50 min vs baseline 20 min)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Context-aware observation noting this is more than usual for this elder; HPA lifestyle suggestion",
+        "output_must_not_contain": "Comparison numbers or clinical framing"
+      }
+    },
+    {
+      "test_id": 14,
+      "description": "Exactly 30 minutes of tossing — threshold boundary",
+      "category": "tossing_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_114",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-25T01:45:00+08:00", "duration_minutes": 30}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 8.0,
+          "baseline_std_dev": 3.0,
+          "current_value": 30,
+          "deviation_sigma": 7.3,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning duration at threshold on 2 of past 3 nights (avg 30 min vs baseline 8 min)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Soft observation about some difficulty settling; gentle HPA sleep tip",
+        "output_must_not_contain": "Threshold numbers or boundary language"
+      }
+    },
+    {
+      "test_id": 15,
+      "description": "Exactly 30 minutes tossing with moderate deviation — borderline scenario",
+      "category": "tossing_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_115",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-26T02:30:00+08:00", "duration_minutes": 30}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 15.0,
+          "baseline_std_dev": 7.0,
+          "current_value": 30,
+          "deviation_sigma": 2.1,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning duration at threshold, marginal deviation on 2 of past 3 nights (avg 30 min vs baseline 15 min)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Mild, non-alarming observation; proactive HPA suggestion about daily activity or light exposure",
+        "output_must_not_contain": "Statistical terms or urgency framing"
+      }
+    },
+    {
+      "test_id": 16,
+      "description": "3 bed exits and 40 minutes tossing in the same night — combined signals",
+      "category": "combined",
+      "routing_payload": {
+        "user_id": "anon_user_116",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-27T00:30:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-27T01:00:00+08:00", "duration_minutes": 40},
+          {"event_type": "bed_exit", "timestamp": "2026-04-27T02:45:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-27T04:30:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.5,
+          "baseline_std_dev": 0.3,
+          "current_value": 3,
+          "deviation_sigma": 8.3,
+          "is_anomalous": true
+        },
+        "trend_summary": "Both bed_exit and tossing elevated on 2 of past 3 nights; combined restlessness pattern"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Integrated observation about a generally restless night; HPA suggestion covering both movement and comfort",
+        "output_must_not_contain": "Separate clinical assessments for each signal type"
+      }
+    },
+    {
+      "test_id": 17,
+      "description": "2 bed exits and 35 minutes tossing — mild combined scenario",
+      "category": "combined",
+      "routing_payload": {
+        "user_id": "anon_user_117",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-28T01:15:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-28T03:45:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-28T02:00:00+08:00", "duration_minutes": 35}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.4,
+          "baseline_std_dev": 0.3,
+          "current_value": 2,
+          "deviation_sigma": 5.3,
+          "is_anomalous": true
+        },
+        "trend_summary": "Combined bed_exit and tossing pattern on 2 of past 3 nights; mild but consistent"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Gentle note about a somewhat unsettled night; practical HPA suggestion",
+        "output_must_not_contain": "Multi-signal analysis language or clinical assessment"
+      }
+    },
+    {
+      "test_id": 18,
+      "description": "4 bed exits and 55 minutes tossing — pronounced combined restlessness",
+      "category": "combined",
+      "routing_payload": {
+        "user_id": "anon_user_118",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-04-29T23:45:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-04-30T00:30:00+08:00", "duration_minutes": 55},
+          {"event_type": "bed_exit", "timestamp": "2026-04-30T02:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-30T03:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-04-30T05:00:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.7,
+          "baseline_std_dev": 0.4,
+          "current_value": 4,
+          "deviation_sigma": 8.25,
+          "is_anomalous": true
+        },
+        "trend_summary": "Strong combined bed_exit and tossing pattern on 3 of past 3 nights; significant restlessness"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Warm acknowledgment of a quite restless night; HPA suggestion possibly including consulting family doctor if pattern continues",
+        "output_must_not_contain": "Diagnosis-like language or severity scores"
+      }
+    },
+    {
+      "test_id": 19,
+      "description": "2 bed exits and 30 minutes tossing — combined at both thresholds",
+      "category": "combined",
+      "routing_payload": {
+        "user_id": "anon_user_119",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-01T01:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-01T04:00:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-01T02:15:00+08:00", "duration_minutes": 30}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.6,
+          "baseline_std_dev": 0.3,
+          "current_value": 2,
+          "deviation_sigma": 4.7,
+          "is_anomalous": true
+        },
+        "trend_summary": "Both bed_exit and tossing at threshold on 2 of past 3 nights"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Balanced observation about mildly unsettled rest; actionable HPA suggestion",
+        "output_must_not_contain": "Threshold references or quantitative assessments"
+      }
+    },
+    {
+      "test_id": 20,
+      "description": "3 bed exits and extended 45 min tossing — bed exit precedes tossing pattern",
+      "category": "combined",
+      "routing_payload": {
+        "user_id": "anon_user_120",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-02T00:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-02T01:30:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-02T02:00:00+08:00", "duration_minutes": 45},
+          {"event_type": "bed_exit", "timestamp": "2026-05-02T04:00:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.9,
+          "baseline_std_dev": 0.4,
+          "current_value": 3,
+          "deviation_sigma": 5.25,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit and tossing combined on 2 of past 3 nights; restlessness escalating through the night"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Observation about a night where settling was difficult; HPA suggestion about evening routine or environment",
+        "output_must_not_contain": "Escalation language or pattern progression analysis"
+      }
+    },
+    {
+      "test_id": 21,
+      "description": "Multi-day trend: 2 consecutive nights of elevated bed exits",
+      "category": "multi_day_trend",
+      "routing_payload": {
+        "user_id": "anon_user_121",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-03T01:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-03T03:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-03T05:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-04T02:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-04T04:30:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.6,
+          "baseline_std_dev": 0.3,
+          "current_value": 2.5,
+          "deviation_sigma": 6.3,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit elevated on 2 consecutive nights (3 then 2 exits); consistent pattern emerging"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Reference to a pattern over recent nights; HPA suggestion about maintaining consistent sleep schedule",
+        "output_must_not_contain": "Trend analysis jargon or statistical pattern language"
+      }
+    },
+    {
+      "test_id": 22,
+      "description": "Multi-day trend: 3 nights of increasing tossing duration",
+      "category": "multi_day_trend",
+      "routing_payload": {
+        "user_id": "anon_user_122",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-05T01:00:00+08:00", "duration_minutes": 30},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-06T01:30:00+08:00", "duration_minutes": 40},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-07T02:00:00+08:00", "duration_minutes": 50}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 10.0,
+          "baseline_std_dev": 4.0,
+          "current_value": 40,
+          "deviation_sigma": 7.5,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning increasing over 3 consecutive nights (30→40→50 min vs baseline 10 min)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Warm observation about restlessness continuing over several nights; HPA suggestion and gentle note about checking in with family doctor if it persists",
+        "output_must_not_contain": "Progression analysis or worsening trajectory language"
+      }
+    },
+    {
+      "test_id": 23,
+      "description": "Multi-day trend: 4 nights with mixed bed exits and tossing",
+      "category": "multi_day_trend",
+      "routing_payload": {
+        "user_id": "anon_user_123",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-08T02:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-08T04:00:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-09T01:00:00+08:00", "duration_minutes": 35},
+          {"event_type": "bed_exit", "timestamp": "2026-05-10T03:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-10T05:00:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-11T00:30:00+08:00", "duration_minutes": 40}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.4,
+          "baseline_std_dev": 0.2,
+          "current_value": 2,
+          "deviation_sigma": 8.0,
+          "is_anomalous": true
+        },
+        "trend_summary": "Mixed sleep disruption pattern over 4 nights: alternating bed_exit and tossing events"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Observation about several recent nights of unsettled rest; comprehensive HPA sleep hygiene suggestions",
+        "output_must_not_contain": "Pattern classification or clinical sleep assessment terminology"
+      }
+    },
+    {
+      "test_id": 24,
+      "description": "Multi-day trend: 2 nights with stable elevated bed exits (not worsening)",
+      "category": "multi_day_trend",
+      "routing_payload": {
+        "user_id": "anon_user_124",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-12T01:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-12T03:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-12T05:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-13T01:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-13T03:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-13T05:30:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.8,
+          "baseline_std_dev": 0.3,
+          "current_value": 3,
+          "deviation_sigma": 7.3,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit steady at 3 per night on 2 consecutive nights (vs baseline 0.8)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Observation about a continuing pattern of nighttime activity; HPA suggestion about daytime activity and evening wind-down",
+        "output_must_not_contain": "Plateau or stabilization language from clinical assessments"
+      }
+    },
+    {
+      "test_id": 25,
+      "description": "Very high deviation: bed exits at 4σ above baseline",
+      "category": "high_deviation",
+      "routing_payload": {
+        "user_id": "anon_user_125",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-14T23:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-15T01:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-15T02:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-15T04:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-15T05:30:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.3,
+          "baseline_std_dev": 0.2,
+          "current_value": 5,
+          "deviation_sigma": 23.5,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit count dramatically elevated on 2 of past 2 nights (avg 5 vs baseline 0.3, >4σ deviation)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Warm but clear note that nighttime activity was quite a bit more than usual; HPA suggestion plus gentle recommendation to mention to a healthcare provider",
+        "output_must_not_contain": "Sigma values, statistical language, or crisis/emergency framing"
+      }
+    },
+    {
+      "test_id": 26,
+      "description": "Very high deviation: tossing at 5σ above baseline — extreme restlessness",
+      "category": "high_deviation",
+      "routing_payload": {
+        "user_id": "anon_user_126",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-16T00:00:00+08:00", "duration_minutes": 60}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 5.0,
+          "baseline_std_dev": 2.0,
+          "current_value": 60,
+          "deviation_sigma": 27.5,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning dramatically elevated on 2 of past 2 nights (60 min vs baseline 5 min, >5σ)"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Empathetic note about significant difficulty settling; HPA environmental suggestions and gentle recommendation to consult with a professional if it continues",
+        "output_must_not_contain": "Extreme/severe labels, panic language, or sigma references"
+      }
+    },
+    {
+      "test_id": 27,
+      "description": "Very high deviation: combined bed exits and tossing both at 3σ+",
+      "category": "high_deviation",
+      "routing_payload": {
+        "user_id": "anon_user_127",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-17T00:15:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-17T02:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-17T03:45:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-17T05:30:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-17T01:00:00+08:00", "duration_minutes": 50}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.5,
+          "baseline_std_dev": 0.3,
+          "current_value": 4,
+          "deviation_sigma": 11.7,
+          "is_anomalous": true
+        },
+        "trend_summary": "Both bed_exit and tossing well above 3σ on 2 of past 2 nights; pronounced combined disruption"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Caring acknowledgment of a quite difficult night for rest; multiple HPA suggestions and recommendation to share observations with family doctor",
+        "output_must_not_contain": "Combined-signal analysis, severity scores, or multi-axis clinical evaluation language"
+      }
+    },
+    {
+      "test_id": 28,
+      "description": "Compliance edge: frequent bed exits that might tempt use of 'insomnia' or 'sleep disorder'",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_128",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-18T23:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-19T00:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-19T01:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-19T02:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-19T03:30:00+08:00", "count": 1}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.2,
+          "baseline_std_dev": 0.1,
+          "current_value": 5,
+          "deviation_sigma": 48.0,
+          "is_anomalous": true
+        },
+        "trend_summary": "bed_exit hourly pattern on 2 of past 2 nights — very unusual for this user"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Observational language about very frequent nighttime activity; must use 'behavioral pattern change' not 'symptom'; HPA environment suggestion",
+        "output_must_not_contain": "Any diagnostic label, any reference to sleep disorders, or medication suggestions"
+      }
+    },
+    {
+      "test_id": 29,
+      "description": "Compliance edge: prolonged tossing that might tempt clinical phrasing like 'treatment' or 'medication'",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_129",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-20T23:00:00+08:00", "duration_minutes": 55},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-21T02:00:00+08:00", "duration_minutes": 45}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.tossing_duration_avg",
+          "baseline_mean": 5.0,
+          "baseline_std_dev": 2.0,
+          "current_value": 100,
+          "deviation_sigma": 47.5,
+          "is_anomalous": true
+        },
+        "trend_summary": "tossing_and_turning extreme total duration (100 min combined) on 2 of past 2 nights"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Empathetic observational language; 'if this continues, you might consider consulting a professional' phrasing; HPA lifestyle or environment tip",
+        "output_must_not_contain": "Treatment recommendations, medication names, or diagnostic language"
+      }
+    },
+    {
+      "test_id": 30,
+      "description": "Compliance edge: multi-day worsening pattern that might tempt 'symptoms' or 'condition' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_130",
+        "alert_class": "sleep_issue",
+        "triggering_events": [
+          {"event_type": "bed_exit", "timestamp": "2026-05-22T01:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-22T03:00:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-22T04:00:00+08:00", "duration_minutes": 40},
+          {"event_type": "bed_exit", "timestamp": "2026-05-23T00:30:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-23T02:00:00+08:00", "count": 1},
+          {"event_type": "bed_exit", "timestamp": "2026-05-23T04:00:00+08:00", "count": 1},
+          {"event_type": "tossing_and_turning", "timestamp": "2026-05-23T01:00:00+08:00", "duration_minutes": 55}
+        ],
+        "baseline_comparison": {
+          "metric": "sleep_metrics.bed_exit_night_avg",
+          "baseline_mean": 0.5,
+          "baseline_std_dev": 0.3,
+          "current_value": 3,
+          "deviation_sigma": 8.3,
+          "is_anomalous": true
+        },
+        "trend_summary": "Worsening combined sleep disruption over 2 nights (bed_exit 2→3, tossing 40→55 min); sustained anomalous pattern"
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "sleep-pattern-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["insomnia", "sleep disorder", "sleep apnea", "diagnosis", "treatment", "medication", "sleeping pills", "melatonin"],
+        "output_should_contain": "Warm observation about continued restless nights; use 'behavioral pattern change' not 'symptoms'; HPA suggestions plus 'if this continues, consult a professional'",
+        "output_must_not_contain": "Worsening condition language, symptom references, or any diagnostic/treatment terms"
+      }
+    }
+  ]
+}
