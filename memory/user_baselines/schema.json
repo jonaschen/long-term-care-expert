@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UserBaseline",
+  "description": "Per-user behavioral baseline computed during the 14-day silent learning period. Used by L1 router to compare incoming IoT events against individual norms.",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "Anonymous identifier for the user (never real name or personal data)",
+      "pattern": "^anon_user_[a-z0-9]+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["learning", "active", "paused"],
+      "description": "learning = 14-day silent period in progress; active = baseline established, reports enabled; paused = data collection paused"
+    },
+    "learning_start_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when silent learning period began"
+    },
+    "baseline_established_date": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when 14-day period completed and baseline was computed. null if still in learning phase."
+    },
+    "data_collection_days": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 14,
+      "description": "Number of days with valid data collected so far (out of 14 required)"
+    },
+    "sleep_metrics": {
+      "type": "object",
+      "properties": {
+        "bed_exit_night_avg": {
+          "type": "number",
+          "description": "Average nighttime (23:00-06:00) bed exits per night"
+        },
+        "bed_exit_night_std_dev": {
+          "type": "number",
+          "description": "Standard deviation of nighttime bed exits"
+        },
+        "tossing_avg_duration_minutes": {
+          "type": "number",
+          "description": "Average tossing/turning duration per night (minutes)"
+        },
+        "tossing_std_dev_minutes": {
+          "type": "number",
+          "description": "Standard deviation of tossing duration"
+        }
+      },
+      "required": [
+        "bed_exit_night_avg",
+        "bed_exit_night_std_dev",
+        "tossing_avg_duration_minutes",
+        "tossing_std_dev_minutes"
+      ]
+    },
+    "mobility_metrics": {
+      "type": "object",
+      "properties": {
+        "walking_speed_baseline_normal": {
+          "type": "number",
+          "description": "Average normal walking speed (m/s or relative units)"
+        },
+        "walking_speed_baseline_slow": {
+          "type": "number",
+          "description": "Average slow walking speed threshold"
+        },
+        "walking_speed_std_dev": {
+          "type": "number",
+          "description": "Standard deviation of walking speed"
+        },
+        "rise_attempt_fail_rate": {
+          "type": "number",
+          "description": "Average rise attempt failures per day"
+        }
+      },
+      "required": [
+        "walking_speed_baseline_normal",
+        "walking_speed_baseline_slow",
+        "walking_speed_std_dev",
+        "rise_attempt_fail_rate"
+      ]
+    },
+    "activity_metrics": {
+      "type": "object",
+      "properties": {
+        "inactivity_avg_daytime_hours": {
+          "type": "number",
+          "description": "Average continuous daytime inactivity (hours)"
+        },
+        "inactivity_std_dev_hours": {
+          "type": "number",
+          "description": "Standard deviation of daytime inactivity"
+        },
+        "appliance_interaction_avg_duration_minutes": {
+          "type": "number",
+          "description": "Average appliance interaction duration (minutes)"
+        },
+        "appliance_interaction_std_dev_minutes": {
+          "type": "number",
+          "description": "Standard deviation of appliance interaction duration"
+        }
+      },
+      "required": [
+        "inactivity_avg_daytime_hours",
+        "inactivity_std_dev_hours",
+        "appliance_interaction_avg_duration_minutes",
+        "appliance_interaction_std_dev_minutes"
+      ]
+    },
+    "daily_logs": {
+      "type": "array",
+      "description": "Raw daily aggregated metrics collected during learning period (up to 14 entries)",
+      "maxItems": 14,
+      "items": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "bed_exit_night_count": {
+            "type": "integer"
+          },
+          "tossing_duration_minutes": {
+            "type": "number"
+          },
+          "walking_speed_avg": {
+            "type": "number"
+          },
+          "rise_attempt_fails": {
+            "type": "integer"
+          },
+          "max_inactivity_hours": {
+            "type": "number"
+          },
+          "appliance_interaction_minutes": {
+            "type": "number"
+          }
+        },
+        "required": ["date"]
+      }
+    }
+  },
+  "required": [
+    "user_id",
+    "status",
+    "learning_start_date",
+    "data_collection_days"
+  ]
+}

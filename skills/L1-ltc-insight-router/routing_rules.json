@@ -1,0 +1,113 @@
+{
+  "version": "1.0.0",
+  "rules": [
+    {
+      "event": "bed_exit",
+      "condition": {
+        "count": { "gte": 2 },
+        "time_window": "23:00-06:00"
+      },
+      "alert_class": "sleep_issue",
+      "route_to": "L2-sleep-pattern-expert",
+      "suppression": "standard",
+      "compare_to_baseline": true,
+      "baseline_field": "sleep_metrics.bed_exit_night_avg"
+    },
+    {
+      "event": "tossing_and_turning",
+      "condition": {
+        "duration_minutes": { "gte": 30 }
+      },
+      "alert_class": "sleep_issue",
+      "route_to": "L2-sleep-pattern-expert",
+      "suppression": "standard",
+      "compare_to_baseline": true,
+      "baseline_field": "sleep_metrics.tossing_avg_duration_minutes"
+    },
+    {
+      "event": "walking",
+      "condition": {
+        "speed": "anomalous_slow",
+        "speed_deviation": { "gte_percent_below_baseline": 30 }
+      },
+      "alert_class": "mobility_issue",
+      "route_to": "L2-mobility-fall-expert",
+      "suppression": "standard",
+      "compare_to_baseline": true,
+      "baseline_field": "mobility_metrics.walking_speed_baseline_normal"
+    },
+    {
+      "event": "rise_attempt_fail",
+      "condition": {
+        "count": { "gte": 2 },
+        "consecutive": true
+      },
+      "alert_class": "mobility_issue",
+      "route_to": "L2-mobility-fall-expert",
+      "suppression": "standard",
+      "compare_to_baseline": false
+    },
+    {
+      "event": "posture_change",
+      "condition": {
+        "posture_subtype": "sudden_drop"
+      },
+      "alert_class": "URGENT_FALL_RISK",
+      "route_to": "L2-mobility-fall-expert",
+      "suppression": "BYPASS",
+      "priority": "IMMEDIATE",
+      "compare_to_baseline": false,
+      "notes": "Any single occurrence bypasses ALL suppression logic. Route immediately regardless of alert history or learning period. The learning_period.exception field references this rule via the URGENT_FALL_RISK alert_class."
+    },
+    {
+      "event": "wandering",
+      "condition": {
+        "time_window": "23:00-05:00"
+      },
+      "alert_class": "cognitive_issue",
+      "route_to": "L2-dementia-behavior-expert",
+      "suppression": "standard",
+      "compare_to_baseline": false
+    },
+    {
+      "event": "inactivity",
+      "condition": {
+        "duration_hours": { "gte": 4 },
+        "time_window": "daytime"
+      },
+      "alert_class": "cognitive_issue",
+      "route_to": "L2-dementia-behavior-expert",
+      "suppression": "standard",
+      "compare_to_baseline": true,
+      "baseline_field": "activity_metrics.inactivity_avg_daytime_hours"
+    },
+    {
+      "event": "appliance_interaction",
+      "condition": {
+        "interaction_duration": "anomalously_long"
+      },
+      "alert_class": "cognitive_issue",
+      "route_to": "L2-dementia-behavior-expert",
+      "suppression": "standard",
+      "compare_to_baseline": true,
+      "baseline_field": "activity_metrics.appliance_interaction_avg_duration_minutes"
+    }
+  ],
+  "suppression_config": {
+    "standard": {
+      "lookback_hours": 48,
+      "require_multi_day_trend": true,
+      "min_distinct_days": 2,
+      "trend_window_hours": 72
+    },
+    "BYPASS": {
+      "description": "No suppression applied. Route immediately.",
+      "applies_to": ["URGENT_FALL_RISK"]
+    }
+  },
+  "learning_period": {
+    "duration_days": 14,
+    "suppress_all_reports": true,
+    "exception": "URGENT_FALL_RISK"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "version": "1.0.0",
+  "description": "Required observational language patterns. At least one should appear in every family-facing report to ensure proper tone and framing.",
+  "required_patterns": [
+    "the sensor observed that",
+    "the sensor noticed",
+    "we observed that",
+    "compared to the usual pattern",
+    "recently seems to",
+    "behavioral pattern has changed",
+    "behavioral pattern change",
+    "the HPA health guide suggests",
+    "the health guide suggests",
+    "you might consider",
+    "if this continues",
+    "accompanying to see a professional",
+    "we will continue observing",
+    "over the past few days"
+  ],
+  "tone_requirements": {
+    "voice": "warm, empathetic, like a caring friend",
+    "speed": "slow, never rushed or clinical",
+    "alarmism": "never create unnecessary anxiety",
+    "data_translation": "transform raw sensor numbers into daily-life observations",
+    "positive_framing": "lead with positive observations when possible"
+  },
+  "data_translation_examples": [
+    {"raw": "bed_exit count: 4", "warm": "nighttime activity was a bit more frequent than usual"},
+    {"raw": "tossing_and_turning: 45 min", "warm": "elder seemed to have some difficulty settling in"},
+    {"raw": "walking speed -30%", "warm": "steps seemed a bit slower than usual these past few days"},
+    {"raw": "inactivity: 5 hours", "warm": "daytime activity levels noticeably lower recently"},
+    {"raw": "rise_attempt_fail x2", "warm": "getting up from seated position seemed to take more effort"}
+  ]
+}

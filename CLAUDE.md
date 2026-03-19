@@ -10,7 +10,7 @@ Two specification documents must be read before writing any code:
 - `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — core system architecture, all five L2 Skills, three MCP tools, SaMD compliance rules, Phases 1–4
 - `LONG_TERM_CARE_EXT_PLAN.md` — Japan calibration layer extension: new `east-asian-health-context-expert` Skill, `search_japan_clinical_data` tool, four Japanese RAG categories, enrichments to three existing Skills, Phases 5–6
 
-**Current state:** Phase 1 in progress. All 9 HPA/AD-8 source PDFs downloaded. 177 chunks extracted and compliance-verified across all 5 categories. Qdrant `hpa_knowledge` collection currently holds 149 points — **re-index required** (`.venv/bin/python3 tools/embedding_pipeline.py --reset`) to pick up 28 new `general_aging` chunks. `search_hpa_guidelines` tool built and tested. 30-query RAG evaluation script ready — awaiting manual scoring. No skill or MCP server code written yet.
+**Current state:** Phase 1 baseline system design is complete (per-user baseline schema, 14-day silent learning period logic, and `baseline_manager.py` implemented). All 9 HPA/AD-8 source PDFs downloaded. 177 chunks extracted and compliance-verified across all 5 categories. Qdrant `hpa_knowledge` collection currently holds 149 points — **re-index required** (`.venv/bin/python3 tools/embedding_pipeline.py --reset`) to pick up 28 new `general_aging` chunks. `search_hpa_guidelines` tool built and tested. 30-query RAG evaluation script ready — awaiting manual scoring. Phase 2 is in progress: all L1/L2 SKILL.md files written, FastMCP server built with 3 tools (`search_hpa_guidelines`, `generate_line_report`, `check_alert_history`), compliance files created (`blacklist_terms.json`, `whitelist_terms.json`, `disclaimer_template.md`), 100-case routing accuracy test suite built, 50-case adversarial test suite built. Still pending: Qdrant re-index, RAG eval scoring, L2 reference docs, running L1 agent validation.
 
 ## Knowledge Base — Current State
 
@@ -77,17 +77,23 @@ Qdrant (local file: knowledge_base/vector_index/)
 | `tools/hpa_rag_search.py` | `search_hpa_guidelines` MCP tool — hybrid search (dense + sparse RRF fusion). Hard filters enforced: `medical_content == false`, `audience != internal_reasoning_only`. Also exposes `lookup_ad8_chunks()`. CLI: `.venv/bin/python3 tools/hpa_rag_search.py "query" --category <cat> [--top-k N]` |
 | `tests/rag_eval/run_rag_eval.py` | Runs 30-query RAG evaluation across all 5 categories. Saves Markdown report to `tests/rag_eval/results_YYYY-MM-DD.md` for manual scoring. Run: `.venv/bin/python3 tests/rag_eval/run_rag_eval.py` |
 
+### Phase 2 Tools
+
+| Script | Purpose |
+|---|---|
+| `tools/baseline_manager.py` | `BaselineManager` class — per-user behavioral baseline storage and 14-day silent learning period logic. Manages `memory/user_baselines/` JSON files. |
+| `tools/mcp_server.py` | FastMCP server exposing 3 tools: `search_hpa_guidelines`, `generate_line_report`, `check_alert_history`. |
+| `tools/line_report_generator.py` | `generate_line_report` tool — blacklist scanning of output text and auto-injection of mandatory legal disclaimer from `compliance/disclaimer_template.md`. |
+| `tools/alert_history_checker.py` | `check_alert_history` tool — alert suppression within 48-72h window to prevent alert fatigue. Used by L1 router. |
+
 **Python environment:** A venv exists at `.venv/`. Always use it for `tools/` and `tests/rag_eval/`. System Python is externally managed (cannot `pip install` without venv).
 
-```bash
-source .venv/bin/activate                        # activate
-.venv/bin/python3 tools/embedding_pipeline.py   # or invoke directly
-```
-
-**Pending Phase 1 work (for contributors):**
+**Pending work (for contributors):**
 1. Re-index Qdrant: `.venv/bin/python3 tools/embedding_pipeline.py --reset` — picks up 28 new `general_aging` chunks (177 total → all indexed)
 2. Run and manually score the 30-query RAG eval: `.venv/bin/python3 tests/rag_eval/run_rag_eval.py` → score `tests/rag_eval/results_*.md` (target ≥ 4/5)
-3. Design `memory/user_baselines/` schema — per-user baseline data structure + 14-day silent learning period logic (see `LONGTERM_CARE_EXPERT_DEV_PLAN.md` Phase 1 spec)
+3. Build L2 reference docs (e.g., `sleep_pattern_analyzer.py`, `gait_anomaly_detector.py`)
+4. Validate L1 routing against 100-case test suite (requires running L1 agent)
+5. Build automated blacklist scanner for generated test outputs
 
 ## Two-Pillar Knowledge Architecture
 

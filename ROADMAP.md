@@ -46,9 +46,9 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 - [ ] **Score RAG evaluation** — run `.venv/bin/python3 tests/rag_eval/run_rag_eval.py` then fill in `tests/rag_eval/results_*.md` (target ≥ 4/5 per category)
 
 **Baseline System Design**
-- [ ] Design per-user behavioral baseline data structure
-- [ ] Implement 14-day silent learning period logic (no reports sent during this window)
-- [ ] Define storage schema for `memory/user_baselines/`
+- [x] Design per-user behavioral baseline data structure
+- [x] Implement 14-day silent learning period logic (no reports sent during this window)
+- [x] Define storage schema for `memory/user_baselines/`
 
 ### Acceptance Criteria
 | Criterion | Target |
@@ -68,36 +68,36 @@ Each phase has hard acceptance criteria that must pass before the next phase beg
 ### Tasks
 
 **Directory and File Structure**
-- [ ] Create full directory layout per `LONGTERM_CARE_EXPERT_DEV_PLAN.md` spec
-- [ ] Write `AGENTS.md` (system entry point and routing manifest)
-- [ ] Write `COMPLIANCE.md` (SaMD boundary rules, blacklist, whitelist terms)
+- [x] Create full directory layout per `LONGTERM_CARE_EXPERT_DEV_PLAN.md` spec
+- [x] Write `AGENTS.md` (system entry point and routing manifest)
+- [x] Write `COMPLIANCE.md` (SaMD boundary rules, blacklist, whitelist terms)
 
 **L1 Router (`ltc-insight-router`)**
-- [ ] Write `skills/L1-ltc-insight-router/SKILL.md` (routing system prompt)
-- [ ] Write `skills/L1-ltc-insight-router/routing_rules.json` (machine-readable event→route mapping)
-- [ ] Document JSON event schema at `skills/L1-ltc-insight-router/references/json_event_schema.md`
-- [ ] Build 100-case routing accuracy test suite (`tests/routing_accuracy/test_cases_100.json`)
-- [ ] Validate L1 routing against test suite
+- [x] Write `skills/L1-ltc-insight-router/SKILL.md` (routing system prompt)
+- [x] Write `skills/L1-ltc-insight-router/routing_rules.json` (machine-readable event→route mapping)
+- [x] Document JSON event schema at `skills/L1-ltc-insight-router/references/json_event_schema.md`
+- [x] Build 100-case routing accuracy test suite (`tests/routing_accuracy/test_cases_100.json`)
+- [ ] Validate L1 routing against test suite (requires running L1 agent)
 
 **L2 Skills (Priority Order)**
-- [ ] `L2-sleep-pattern-expert`: SKILL.md, `sleep_pattern_analyzer.py`, reference docs
-- [ ] `L2-mobility-fall-expert`: SKILL.md, `gait_anomaly_detector.py`, reference docs — include `sudden_drop` urgency override
-- [ ] `L2-dementia-behavior-expert`: SKILL.md, `behavior_pattern_check.py`, `ad8_observation_guide.md` (behavioral items only, no clinical framing), `dementia_early_signs.md`
-- [ ] `L2-chronic-disease-observer`: SKILL.md, `healthy_lifestyle.md` reference
-- [ ] `L2-weekly-summary-composer`: SKILL.md, `weekly_report_builder.py`, `report_tone_templates.md`
+- [x] `L2-sleep-pattern-expert`: SKILL.md, `sleep_pattern_analyzer.py`, reference docs
+- [x] `L2-mobility-fall-expert`: SKILL.md, `gait_anomaly_detector.py`, reference docs — include `sudden_drop` urgency override
+- [x] `L2-dementia-behavior-expert`: SKILL.md, `behavior_pattern_check.py`, `ad8_observation_guide.md` (behavioral items only, no clinical framing), `dementia_early_signs.md`
+- [x] `L2-chronic-disease-observer`: SKILL.md, `healthy_lifestyle.md` reference
+- [x] `L2-weekly-summary-composer`: SKILL.md, `weekly_report_builder.py`, `report_tone_templates.md`
 
 **MCP Tools (`tools/`)**
-- [ ] Implement `mcp_server.py` (FastMCP main server)
+- [x] Implement `mcp_server.py` (FastMCP main server)
 - [x] `hpa_rag_search.py` — `search_hpa_guidelines` tool ✅ built in Phase 1. Hard filters enforced at implementation level: `medical_content == false` always; `audience != internal_reasoning_only` for all general queries. `lookup_ad8_chunks()` exposed for `dementia-behavior-expert` internal reasoning only.
-- [ ] Implement `line_report_generator.py` — `generate_line_report` tool (auto-inject mandatory legal disclaimer into every message footer; make disclaimer non-removable)
-- [ ] Implement `alert_history_checker.py` — `check_alert_history` tool
+- [x] Implement `line_report_generator.py` — `generate_line_report` tool (auto-inject mandatory legal disclaimer into every message footer; make disclaimer non-removable)
+- [x] Implement `alert_history_checker.py` — `check_alert_history` tool
 
 **Compliance Automation**
-- [ ] Write `compliance/blacklist_terms.json`
-- [ ] Write `compliance/whitelist_terms.json`
-- [ ] Write `compliance/disclaimer_template.md`
+- [x] Write `compliance/blacklist_terms.json`
+- [x] Write `compliance/whitelist_terms.json`
+- [x] Write `compliance/disclaimer_template.md`
 - [ ] Build automated blacklist scanner that runs over all generated test outputs
-- [ ] Prepare 50-case adversarial test suite for Phase 3 (`compliance/adversarial_test_cases.json`)
+- [x] Prepare 50-case adversarial test suite for Phase 3 (`compliance/adversarial_test_cases.json`)
 
 **Evaluation**
 - [ ] Run 30 manually evaluated report generation cases per L2 Skill

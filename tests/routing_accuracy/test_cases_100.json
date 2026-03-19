@@ -1,0 +1,1734 @@
+{
+  "version": "1.0.0",
+  "description": "100-case L1 routing accuracy test suite for ltc-insight-router",
+  "target_accuracy": 0.95,
+  "routing_thresholds_reference": {
+    "bed_exit_night": "count >= 2 during 23:00-06:00",
+    "tossing_and_turning": "duration_minutes >= 30",
+    "walking_anomalous_slow": ">= 30% below baseline",
+    "rise_attempt_fail": "count >= 2 consecutive",
+    "posture_change_sudden_drop": "ANY occurrence — IMMEDIATE, bypass suppression",
+    "wandering": "during 23:00-05:00",
+    "inactivity_daytime": "duration_hours >= 4",
+    "appliance_interaction_anomalous": "duration significantly above baseline avg"
+  },
+  "suppression_parameters": {
+    "lookback_hours": 48,
+    "min_distinct_days": 2,
+    "trend_window_hours": 72,
+    "deviation_sigma": 2.0
+  },
+  "test_cases": [
+    {
+      "test_id": 1,
+      "description": "3 bed exits during night — clear sleep issue",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:15:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:40:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T05:10:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_001",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5, "bed_exit_night_stddev": 0.3}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "3 exits well above baseline avg of 0.5. Multi-day trend assumed established from prior days."
+    },
+    {
+      "test_id": 2,
+      "description": "Exactly 2 bed exits at night — threshold boundary",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T00:30:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T04:00:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_002",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.3, "bed_exit_night_stddev": 0.2}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Boundary case: exactly 2 exits meets >= 2 threshold."
+    },
+    {
+      "test_id": 3,
+      "description": "5 bed exits across two consecutive nights",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-14T02:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-14T04:30:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-14T05:45:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:20:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:50:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_003",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.7, "bed_exit_night_stddev": 0.4}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Multi-day trend across 2 nights. Both nights exceed threshold."
+    },
+    {
+      "test_id": 4,
+      "description": "2 bed exits at 23:00-23:59 window — night boundary",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T23:15:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T23:50:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_004",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.2, "bed_exit_night_stddev": 0.1}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "23:00 is within the night window (23:00-06:00). Should trigger."
+    },
+    {
+      "test_id": 5,
+      "description": "4 bed exits in early morning hours — severe pattern",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T00:10:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:45:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:20:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T05:00:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_005",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.8, "bed_exit_night_stddev": 0.5}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "4 exits far exceeds threshold. Significant deviation from baseline."
+    },
+    {
+      "test_id": 6,
+      "description": "1 bed exit at night — below threshold",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T02:30:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_006",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5, "bed_exit_night_stddev": 0.3}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Only 1 exit, below >= 2 threshold. No route."
+    },
+    {
+      "test_id": 7,
+      "description": "0 bed exits at night — no events",
+      "input_events": [],
+      "baseline": {
+        "user_id": "user_007",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.3, "bed_exit_night_stddev": 0.2}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "No events at all. No route."
+    },
+    {
+      "test_id": 8,
+      "description": "2 bed exits during daytime — not night window",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T10:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T14:30:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_008",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5, "bed_exit_night_stddev": 0.3}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Daytime bed exits (10:00, 14:30) are outside 23:00-06:00 night window. No sleep issue."
+    },
+    {
+      "test_id": 9,
+      "description": "45-minute tossing and turning — above threshold",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 45}
+      ],
+      "baseline": {
+        "user_id": "user_009",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 12, "tossing_stddev_minutes": 5}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "45 min well above 30 min threshold and > 2 sigma from baseline."
+    },
+    {
+      "test_id": 10,
+      "description": "Exactly 30 minutes tossing and turning — boundary",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T03:15:00+08:00", "duration_minutes": 30}
+      ],
+      "baseline": {
+        "user_id": "user_010",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 4}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Boundary case: exactly 30 minutes meets >= 30 threshold."
+    },
+    {
+      "test_id": 11,
+      "description": "60-minute tossing and turning — severe",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T01:00:00+08:00", "duration_minutes": 60}
+      ],
+      "baseline": {
+        "user_id": "user_011",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 8, "tossing_stddev_minutes": 3}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "60 min is extreme. Clear routing."
+    },
+    {
+      "test_id": 12,
+      "description": "Two nights with 35+ min tossing — multi-day trend",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-14T02:30:00+08:00", "duration_minutes": 35},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T01:45:00+08:00", "duration_minutes": 40}
+      ],
+      "baseline": {
+        "user_id": "user_012",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 4}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Multi-day trend of prolonged tossing. Both nights above threshold."
+    },
+    {
+      "test_id": 13,
+      "description": "Tossing 38 min across three nights — established trend",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-13T03:00:00+08:00", "duration_minutes": 38},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-14T02:15:00+08:00", "duration_minutes": 42},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T04:00:00+08:00", "duration_minutes": 36}
+      ],
+      "baseline": {
+        "user_id": "user_013",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 11, "tossing_stddev_minutes": 3}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Three-night trend exceeding threshold every night. Strong routing signal."
+    },
+    {
+      "test_id": 14,
+      "description": "15 minutes tossing — below threshold",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 15}
+      ],
+      "baseline": {
+        "user_id": "user_014",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 4}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "15 min is below 30 min threshold. No route."
+    },
+    {
+      "test_id": 15,
+      "description": "25 minutes tossing — below threshold",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T03:30:00+08:00", "duration_minutes": 25}
+      ],
+      "baseline": {
+        "user_id": "user_015",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 12, "tossing_stddev_minutes": 5}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "25 min is below 30 min threshold. No route."
+    },
+    {
+      "test_id": 16,
+      "description": "29 minutes tossing — just below threshold",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T01:00:00+08:00", "duration_minutes": 29}
+      ],
+      "baseline": {
+        "user_id": "user_016",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 4}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "29 min is just below 30 min threshold. No route."
+    },
+    {
+      "test_id": 17,
+      "description": "Combined: 2 bed exits + 35 min tossing same night",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T04:00:00+08:00", "count": 1},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T02:15:00+08:00", "duration_minutes": 35}
+      ],
+      "baseline": {
+        "user_id": "user_017",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.4, "bed_exit_night_stddev": 0.2, "tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 3}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Both bed_exit and tossing thresholds exceeded. Routes to sleep expert once."
+    },
+    {
+      "test_id": 18,
+      "description": "Combined: 3 bed exits + 50 min tossing over two nights",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-14T02:00:00+08:00", "count": 1},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-14T03:00:00+08:00", "duration_minutes": 50},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:30:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T04:15:00+08:00", "count": 1},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T02:45:00+08:00", "duration_minutes": 45}
+      ],
+      "baseline": {
+        "user_id": "user_018",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.3, "bed_exit_night_stddev": 0.2, "tossing_avg_duration_minutes": 8, "tossing_stddev_minutes": 3}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Multi-day combined sleep disruption pattern. Strong signal."
+    },
+    {
+      "test_id": 19,
+      "description": "Combined: 1 bed exit + 32 min tossing — only tossing triggers",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:00:00+08:00", "count": 1},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T01:30:00+08:00", "duration_minutes": 32}
+      ],
+      "baseline": {
+        "user_id": "user_019",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5, "bed_exit_night_stddev": 0.3, "tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 4}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Bed exit count (1) below threshold but tossing (32 min) exceeds threshold. Routes on tossing."
+    },
+    {
+      "test_id": 20,
+      "description": "Combined: 4 bed exits + 55 min tossing — severe combined disruption",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T00:30:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T02:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:45:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T05:30:00+08:00", "count": 1},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T01:00:00+08:00", "duration_minutes": 55}
+      ],
+      "baseline": {
+        "user_id": "user_020",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.6, "bed_exit_night_stddev": 0.3, "tossing_avg_duration_minutes": 9, "tossing_stddev_minutes": 3}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Severe combined pattern. Both thresholds exceeded by wide margins."
+    },
+    {
+      "test_id": 21,
+      "description": "Walking 35% below baseline — above mobility threshold",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T09:00:00+08:00", "speed_m_per_s": 0.52, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_021",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.05}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "0.52 is 35% below 0.80 baseline. Exceeds 30% threshold."
+    },
+    {
+      "test_id": 22,
+      "description": "Walking 40% below baseline — clear gait slowdown",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T10:30:00+08:00", "speed_m_per_s": 0.48, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_022",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "0.48 is 40% below 0.80 baseline. Clear mobility concern."
+    },
+    {
+      "test_id": 23,
+      "description": "Walking 50% below baseline over two days — severe trend",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-14T11:00:00+08:00", "speed_m_per_s": 0.40, "classification": "anomalous_slow"},
+        {"event_type": "walking", "timestamp": "2025-01-15T09:30:00+08:00", "speed_m_per_s": 0.38, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_023",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.05}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Multi-day 50% slowdown. Severe mobility degradation."
+    },
+    {
+      "test_id": 24,
+      "description": "Walking exactly 30% below baseline — boundary",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T14:00:00+08:00", "speed_m_per_s": 0.56, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_024",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.05}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Boundary case: exactly 30% below baseline (0.56 = 0.80 * 0.70). Meets threshold."
+    },
+    {
+      "test_id": 25,
+      "description": "Walking 33% below baseline — three-day trend",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-13T10:00:00+08:00", "speed_m_per_s": 0.54, "classification": "anomalous_slow"},
+        {"event_type": "walking", "timestamp": "2025-01-14T11:00:00+08:00", "speed_m_per_s": 0.52, "classification": "anomalous_slow"},
+        {"event_type": "walking", "timestamp": "2025-01-15T09:00:00+08:00", "speed_m_per_s": 0.50, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_025",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Three-day deteriorating gait trend. Progressive slowdown from 33% to 37.5%."
+    },
+    {
+      "test_id": 26,
+      "description": "Walking 20% below baseline — below threshold",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T10:00:00+08:00", "speed_m_per_s": 0.64, "classification": "slightly_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_026",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.06}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "20% below baseline (0.64) does not meet 30% threshold. No route."
+    },
+    {
+      "test_id": 27,
+      "description": "Walking 15% below baseline — well within normal variation",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T09:00:00+08:00", "speed_m_per_s": 0.68, "classification": "normal"}
+      ],
+      "baseline": {
+        "user_id": "user_027",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.06}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "15% below baseline. Normal daily variation. No route."
+    },
+    {
+      "test_id": 28,
+      "description": "Walking 28% below baseline — just below threshold",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T10:00:00+08:00", "speed_m_per_s": 0.576, "classification": "slightly_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_028",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.05}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "28% below baseline. Just shy of 30% threshold. No route."
+    },
+    {
+      "test_id": 29,
+      "description": "2 consecutive rise attempt failures",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:00:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:02:00+08:00", "attempt_number": 2, "consecutive": true}
+      ],
+      "baseline": {
+        "user_id": "user_029",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.1}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "2 consecutive failures meets >= 2 threshold."
+    },
+    {
+      "test_id": 30,
+      "description": "3 consecutive rise attempt failures — severe",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T06:45:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T06:47:00+08:00", "attempt_number": 2, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T06:50:00+08:00", "attempt_number": 3, "consecutive": true}
+      ],
+      "baseline": {
+        "user_id": "user_030",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "3 consecutive failures. Severe difficulty rising."
+    },
+    {
+      "test_id": 31,
+      "description": "Rise attempt failures across two mornings",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-14T07:10:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-14T07:12:00+08:00", "attempt_number": 2, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T06:50:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T06:53:00+08:00", "attempt_number": 2, "consecutive": true}
+      ],
+      "baseline": {
+        "user_id": "user_031",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Multi-day rise attempt failures. Clear trend."
+    },
+    {
+      "test_id": 32,
+      "description": "4 consecutive rise attempt failures — very severe",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:00:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:03:00+08:00", "attempt_number": 2, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:06:00+08:00", "attempt_number": 3, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:10:00+08:00", "attempt_number": 4, "consecutive": true}
+      ],
+      "baseline": {
+        "user_id": "user_032",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "4 consecutive failures. Very severe rising difficulty."
+    },
+    {
+      "test_id": 33,
+      "description": "Rise attempt fails across three days",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-13T07:00:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-13T07:03:00+08:00", "attempt_number": 2, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-14T06:55:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-14T06:58:00+08:00", "attempt_number": 2, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:10:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:12:00+08:00", "attempt_number": 2, "consecutive": true}
+      ],
+      "baseline": {
+        "user_id": "user_033",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Three-day trend of consecutive rise failures every morning."
+    },
+    {
+      "test_id": 34,
+      "description": "1 rise attempt failure — below threshold",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:00:00+08:00", "attempt_number": 1, "consecutive": false}
+      ],
+      "baseline": {
+        "user_id": "user_034",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.1}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Single non-consecutive failure. Below >= 2 consecutive threshold."
+    },
+    {
+      "test_id": 35,
+      "description": "1 rise attempt failure, isolated — no trend",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:30:00+08:00", "attempt_number": 1, "consecutive": false}
+      ],
+      "baseline": {
+        "user_id": "user_035",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Single isolated failure. No route."
+    },
+    {
+      "test_id": 36,
+      "description": "Sudden drop posture change — IMMEDIATE ROUTE, living room",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T14:30:00+08:00", "posture_type": "sudden_drop", "location": "living_room", "confidence": 0.95}
+      ],
+      "baseline": null,
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: sudden_drop bypasses ALL suppression. Immediate routing regardless of baseline."
+    },
+    {
+      "test_id": 37,
+      "description": "Sudden drop posture change — IMMEDIATE ROUTE, bathroom",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T08:15:00+08:00", "posture_type": "sudden_drop", "location": "bathroom", "confidence": 0.92}
+      ],
+      "baseline": null,
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: Bathroom fall. Immediate routing. No baseline needed."
+    },
+    {
+      "test_id": 38,
+      "description": "Sudden drop posture change — IMMEDIATE ROUTE, bedroom at night",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T02:30:00+08:00", "posture_type": "sudden_drop", "location": "bedroom", "confidence": 0.88}
+      ],
+      "baseline": null,
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: Nighttime bedroom fall. Immediate routing."
+    },
+    {
+      "test_id": 39,
+      "description": "Sudden drop posture change — IMMEDIATE ROUTE, kitchen",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T12:00:00+08:00", "posture_type": "sudden_drop", "location": "kitchen", "confidence": 0.90}
+      ],
+      "baseline": null,
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: Kitchen fall during mealtime. Immediate routing."
+    },
+    {
+      "test_id": 40,
+      "description": "Sudden drop — IMMEDIATE ROUTE, during learning period",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T15:00:00+08:00", "posture_type": "sudden_drop", "location": "hallway", "confidence": 0.93}
+      ],
+      "baseline": {
+        "user_id": "user_040",
+        "learning_complete": false,
+        "learning_day": 5
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: sudden_drop BYPASSES learning period. Routes immediately even during learning."
+    },
+    {
+      "test_id": 41,
+      "description": "Sudden drop — IMMEDIATE ROUTE, low confidence sensor",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T11:00:00+08:00", "posture_type": "sudden_drop", "location": "living_room", "confidence": 0.75}
+      ],
+      "baseline": {
+        "user_id": "user_041",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: Even with lower confidence, sudden_drop still routes immediately."
+    },
+    {
+      "test_id": 42,
+      "description": "Sudden drop — IMMEDIATE ROUTE, after recent alert (no 48h suppression)",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T16:00:00+08:00", "posture_type": "sudden_drop", "location": "bedroom", "confidence": 0.91}
+      ],
+      "baseline": {
+        "user_id": "user_042",
+        "learning_complete": true,
+        "last_alert": {"class": "URGENT_FALL_RISK", "timestamp": "2025-01-15T10:00:00+08:00"}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: sudden_drop bypasses 48h suppression window. Second fall same day still routes."
+    },
+    {
+      "test_id": 43,
+      "description": "Sudden drop — IMMEDIATE ROUTE, hallway at dawn",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T05:45:00+08:00", "posture_type": "sudden_drop", "location": "hallway", "confidence": 0.87}
+      ],
+      "baseline": null,
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: Dawn hallway fall. Early morning high-risk period."
+    },
+    {
+      "test_id": 44,
+      "description": "Sudden drop — IMMEDIATE ROUTE, entrance area",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T17:30:00+08:00", "posture_type": "sudden_drop", "location": "entrance", "confidence": 0.94}
+      ],
+      "baseline": {
+        "user_id": "user_044",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.75}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: Entrance area fall. Possibly returning from outside."
+    },
+    {
+      "test_id": 45,
+      "description": "Sudden drop — IMMEDIATE ROUTE, with concurrent slow gait data",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T13:00:00+08:00", "speed_m_per_s": 0.50, "classification": "anomalous_slow"},
+        {"event_type": "posture_change", "timestamp": "2025-01-15T13:15:00+08:00", "posture_type": "sudden_drop", "location": "living_room", "confidence": 0.96}
+      ],
+      "baseline": {
+        "user_id": "user_045",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK", "mobility_issue"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: Sudden drop accompanied by slow gait. Both mobility signals present."
+    },
+    {
+      "test_id": 46,
+      "description": "Wandering at 01:30 AM — nighttime cognitive issue",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T01:30:00+08:00", "duration_minutes": 15, "location": "living_room"}
+      ],
+      "baseline": {
+        "user_id": "user_046",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "01:30 is within 23:00-05:00 window. Nighttime wandering triggers cognitive routing."
+    },
+    {
+      "test_id": 47,
+      "description": "Wandering at 03:00 AM — deep night cognitive issue",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T03:00:00+08:00", "duration_minutes": 20, "location": "kitchen"}
+      ],
+      "baseline": {
+        "user_id": "user_047",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "03:00 AM wandering in kitchen. Classic nighttime confusion pattern."
+    },
+    {
+      "test_id": 48,
+      "description": "Wandering at 23:30 — beginning of night window",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T23:30:00+08:00", "duration_minutes": 10, "location": "hallway"}
+      ],
+      "baseline": {
+        "user_id": "user_048",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "23:30 is within 23:00-05:00 window. Routes to cognitive expert."
+    },
+    {
+      "test_id": 49,
+      "description": "Wandering at 04:50 — near end of night window",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T04:50:00+08:00", "duration_minutes": 25, "location": "living_room"}
+      ],
+      "baseline": {
+        "user_id": "user_049",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "04:50 is within 23:00-05:00 window. Near boundary but still in range."
+    },
+    {
+      "test_id": 50,
+      "description": "Wandering across two nights — multi-day cognitive concern",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-14T02:00:00+08:00", "duration_minutes": 12, "location": "hallway"},
+        {"event_type": "wandering", "timestamp": "2025-01-15T01:15:00+08:00", "duration_minutes": 18, "location": "kitchen"}
+      ],
+      "baseline": {
+        "user_id": "user_050",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Two-night wandering trend. Escalating duration."
+    },
+    {
+      "test_id": 51,
+      "description": "Wandering at 10:00 AM daytime — outside night window",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T10:00:00+08:00", "duration_minutes": 20, "location": "garden"}
+      ],
+      "baseline": {
+        "user_id": "user_051",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "10:00 AM is outside 23:00-05:00 window. Daytime wandering does not trigger cognitive routing."
+    },
+    {
+      "test_id": 52,
+      "description": "Wandering at 15:00 PM — daytime, no route",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T15:00:00+08:00", "duration_minutes": 30, "location": "hallway"}
+      ],
+      "baseline": {
+        "user_id": "user_052",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Afternoon wandering. Outside night window. No route."
+    },
+    {
+      "test_id": 53,
+      "description": "Wandering at 06:00 AM — outside night window",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T06:00:00+08:00", "duration_minutes": 15, "location": "living_room"}
+      ],
+      "baseline": {
+        "user_id": "user_053",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "06:00 is outside 23:00-05:00 window. Early morning but not nighttime. No route."
+    },
+    {
+      "test_id": 54,
+      "description": "5 hours daytime inactivity — above threshold",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-15T10:00:00+08:00", "duration_hours": 5, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_054",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.5, "inactivity_stddev_hours": 0.5}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "5 hours well above 4-hour threshold and far from baseline of 1.5h."
+    },
+    {
+      "test_id": 55,
+      "description": "Exactly 4 hours daytime inactivity — boundary",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-15T11:00:00+08:00", "duration_hours": 4, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_055",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.2, "inactivity_stddev_hours": 0.4}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Boundary case: exactly 4 hours meets >= 4 threshold."
+    },
+    {
+      "test_id": 56,
+      "description": "7 hours daytime inactivity — severe",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-15T09:00:00+08:00", "duration_hours": 7, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_056",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.0, "inactivity_stddev_hours": 0.3}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "7 hours of daytime inactivity. Severe disengagement."
+    },
+    {
+      "test_id": 57,
+      "description": "Multi-day 5+ hour daytime inactivity — trend",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-14T10:00:00+08:00", "duration_hours": 5, "period": "daytime"},
+        {"event_type": "inactivity", "timestamp": "2025-01-15T09:30:00+08:00", "duration_hours": 5.5, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_057",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.5, "inactivity_stddev_hours": 0.4}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Two-day trend of prolonged inactivity. Progressive worsening."
+    },
+    {
+      "test_id": 58,
+      "description": "Three-day inactivity trend ≥ 4 hours each",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-13T10:00:00+08:00", "duration_hours": 4.5, "period": "daytime"},
+        {"event_type": "inactivity", "timestamp": "2025-01-14T11:00:00+08:00", "duration_hours": 5, "period": "daytime"},
+        {"event_type": "inactivity", "timestamp": "2025-01-15T09:00:00+08:00", "duration_hours": 6, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_058",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.2, "inactivity_stddev_hours": 0.3}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Three-day escalating inactivity trend. Strong cognitive concern signal."
+    },
+    {
+      "test_id": 59,
+      "description": "3 hours daytime inactivity — below threshold",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-15T13:00:00+08:00", "duration_hours": 3, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_059",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.5, "inactivity_stddev_hours": 0.5}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "3 hours below 4-hour threshold. Could be normal nap. No route."
+    },
+    {
+      "test_id": 60,
+      "description": "2 hours daytime inactivity — well within normal",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-15T14:00:00+08:00", "duration_hours": 2, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_060",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.5, "inactivity_stddev_hours": 0.5}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "2 hours within normal range. No route."
+    },
+    {
+      "test_id": 61,
+      "description": "Anomalous appliance interaction — microwave used for 45 min",
+      "input_events": [
+        {"event_type": "appliance_interaction", "timestamp": "2025-01-15T12:00:00+08:00", "appliance": "microwave", "duration_minutes": 45, "classification": "anomalous"}
+      ],
+      "baseline": {
+        "user_id": "user_061",
+        "learning_complete": true,
+        "activity_metrics": {"appliance_interaction_avg_duration_minutes": 5, "appliance_interaction_stddev_minutes": 2}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "45 min microwave interaction is extremely anomalous (baseline avg 5 min). Possible confusion."
+    },
+    {
+      "test_id": 62,
+      "description": "Repeated stove interaction — 30 min anomalous",
+      "input_events": [
+        {"event_type": "appliance_interaction", "timestamp": "2025-01-15T18:00:00+08:00", "appliance": "stove", "duration_minutes": 30, "classification": "anomalous"}
+      ],
+      "baseline": {
+        "user_id": "user_062",
+        "learning_complete": true,
+        "activity_metrics": {"appliance_interaction_avg_duration_minutes": 8, "appliance_interaction_stddev_minutes": 3}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "30 min stove interaction, far above 8 min baseline. Anomalous usage pattern."
+    },
+    {
+      "test_id": 63,
+      "description": "Appliance interaction anomaly — washing machine left running repeatedly",
+      "input_events": [
+        {"event_type": "appliance_interaction", "timestamp": "2025-01-14T10:00:00+08:00", "appliance": "washing_machine", "duration_minutes": 180, "classification": "anomalous"},
+        {"event_type": "appliance_interaction", "timestamp": "2025-01-15T09:30:00+08:00", "appliance": "washing_machine", "duration_minutes": 200, "classification": "anomalous"}
+      ],
+      "baseline": {
+        "user_id": "user_063",
+        "learning_complete": true,
+        "activity_metrics": {"appliance_interaction_avg_duration_minutes": 60, "appliance_interaction_stddev_minutes": 10}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Multi-day pattern of forgetting washing machine. Duration far exceeds baseline."
+    },
+    {
+      "test_id": 64,
+      "description": "Appliance difficulty — repeated on/off cycling of TV",
+      "input_events": [
+        {"event_type": "appliance_interaction", "timestamp": "2025-01-15T20:00:00+08:00", "appliance": "television", "interaction_count": 15, "duration_minutes": 10, "classification": "anomalous"}
+      ],
+      "baseline": {
+        "user_id": "user_064",
+        "learning_complete": true,
+        "activity_metrics": {"appliance_interaction_avg_duration_minutes": 3, "appliance_interaction_stddev_minutes": 1}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "15 on/off cycles in 10 min. Appliance difficulty pattern suggesting confusion."
+    },
+    {
+      "test_id": 65,
+      "description": "Appliance interaction — fridge door opened 20 times in 1 hour",
+      "input_events": [
+        {"event_type": "appliance_interaction", "timestamp": "2025-01-15T11:00:00+08:00", "appliance": "refrigerator", "interaction_count": 20, "duration_minutes": 60, "classification": "anomalous"}
+      ],
+      "baseline": {
+        "user_id": "user_065",
+        "learning_complete": true,
+        "activity_metrics": {"appliance_interaction_avg_duration_minutes": 2, "appliance_interaction_stddev_minutes": 1}
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "20 fridge opens in 1 hour. Repetitive behavior pattern. Cognitive concern."
+    },
+    {
+      "test_id": 66,
+      "description": "Multi-class: bed exits + slow gait — sleep + mobility",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:30:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T05:00:00+08:00", "count": 1},
+        {"event_type": "walking", "timestamp": "2025-01-15T09:00:00+08:00", "speed_m_per_s": 0.50, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_066",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5, "bed_exit_night_stddev": 0.2},
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04}
+      },
+      "expected_routes": ["sleep-pattern-expert", "mobility-fall-expert"],
+      "expected_alert_class": ["sleep_issue", "mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Both sleep (3 bed exits) and mobility (37.5% slow) thresholds exceeded."
+    },
+    {
+      "test_id": 67,
+      "description": "Multi-class: tossing + rise failures — sleep + mobility",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 40},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:00:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:03:00+08:00", "attempt_number": 2, "consecutive": true}
+      ],
+      "baseline": {
+        "user_id": "user_067",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 4},
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0}
+      },
+      "expected_routes": ["sleep-pattern-expert", "mobility-fall-expert"],
+      "expected_alert_class": ["sleep_issue", "mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Poor sleep (40 min tossing) followed by morning rise failures."
+    },
+    {
+      "test_id": 68,
+      "description": "Multi-class: bed exits + slow gait multi-day trend",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-14T02:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-14T04:30:00+08:00", "count": 1},
+        {"event_type": "walking", "timestamp": "2025-01-14T10:00:00+08:00", "speed_m_per_s": 0.52, "classification": "anomalous_slow"},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:30:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:45:00+08:00", "count": 1},
+        {"event_type": "walking", "timestamp": "2025-01-15T09:30:00+08:00", "speed_m_per_s": 0.50, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_068",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.3, "bed_exit_night_stddev": 0.2},
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04}
+      },
+      "expected_routes": ["sleep-pattern-expert", "mobility-fall-expert"],
+      "expected_alert_class": ["sleep_issue", "mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Two-day pattern of sleep disruption + gait slowdown."
+    },
+    {
+      "test_id": 69,
+      "description": "Multi-class: slow gait + nighttime wandering — mobility + cognitive",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T10:00:00+08:00", "speed_m_per_s": 0.50, "classification": "anomalous_slow"},
+        {"event_type": "wandering", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 15, "location": "hallway"}
+      ],
+      "baseline": {
+        "user_id": "user_069",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04},
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": ["mobility-fall-expert", "dementia-behavior-expert"],
+      "expected_alert_class": ["mobility_issue", "cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Both mobility (37.5% slow) and cognitive (nighttime wandering) thresholds hit."
+    },
+    {
+      "test_id": 70,
+      "description": "Multi-class: rise failures + inactivity — mobility + cognitive",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:00:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:03:00+08:00", "attempt_number": 2, "consecutive": true},
+        {"event_type": "inactivity", "timestamp": "2025-01-15T10:00:00+08:00", "duration_hours": 5, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_070",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0},
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.5, "inactivity_stddev_hours": 0.4}
+      },
+      "expected_routes": ["mobility-fall-expert", "dementia-behavior-expert"],
+      "expected_alert_class": ["mobility_issue", "cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Morning rise failures followed by prolonged inactivity. Both domains triggered."
+    },
+    {
+      "test_id": 71,
+      "description": "Multi-class: gait slow + appliance anomaly — mobility + cognitive",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T09:00:00+08:00", "speed_m_per_s": 0.48, "classification": "anomalous_slow"},
+        {"event_type": "appliance_interaction", "timestamp": "2025-01-15T12:00:00+08:00", "appliance": "microwave", "duration_minutes": 40, "classification": "anomalous"}
+      ],
+      "baseline": {
+        "user_id": "user_071",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04},
+        "activity_metrics": {"appliance_interaction_avg_duration_minutes": 5, "appliance_interaction_stddev_minutes": 2}
+      },
+      "expected_routes": ["mobility-fall-expert", "dementia-behavior-expert"],
+      "expected_alert_class": ["mobility_issue", "cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Gait 40% below baseline + anomalous appliance use. Dual-domain concern."
+    },
+    {
+      "test_id": 72,
+      "description": "Multi-class: tossing + nighttime wandering — sleep + cognitive",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T01:00:00+08:00", "duration_minutes": 40},
+        {"event_type": "wandering", "timestamp": "2025-01-15T02:30:00+08:00", "duration_minutes": 15, "location": "kitchen"}
+      ],
+      "baseline": {
+        "user_id": "user_072",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 3},
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": ["sleep-pattern-expert", "dementia-behavior-expert"],
+      "expected_alert_class": ["sleep_issue", "cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Restless sleep followed by nighttime wandering. Sleep + cognitive domains."
+    },
+    {
+      "test_id": 73,
+      "description": "Multi-class: bed exits + inactivity — sleep + cognitive",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:30:00+08:00", "count": 1},
+        {"event_type": "inactivity", "timestamp": "2025-01-15T10:00:00+08:00", "duration_hours": 5, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_073",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.4, "bed_exit_night_stddev": 0.2},
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.5, "inactivity_stddev_hours": 0.4}
+      },
+      "expected_routes": ["sleep-pattern-expert", "dementia-behavior-expert"],
+      "expected_alert_class": ["sleep_issue", "cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Night disruption + daytime disengagement. Both domains triggered."
+    },
+    {
+      "test_id": 74,
+      "description": "Triple-class: bed exits + slow gait + nighttime wandering",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:00:00+08:00", "count": 1},
+        {"event_type": "wandering", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 20, "location": "living_room"},
+        {"event_type": "walking", "timestamp": "2025-01-15T09:00:00+08:00", "speed_m_per_s": 0.50, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_074",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.3, "bed_exit_night_stddev": 0.2},
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04},
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0}
+      },
+      "expected_routes": ["sleep-pattern-expert", "mobility-fall-expert", "dementia-behavior-expert"],
+      "expected_alert_class": ["sleep_issue", "mobility_issue", "cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "All three domains triggered: sleep (bed exits), mobility (slow gait), cognitive (nighttime wandering)."
+    },
+    {
+      "test_id": 75,
+      "description": "Triple-class: tossing + rise failures + inactivity",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T01:30:00+08:00", "duration_minutes": 45},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:00:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:03:00+08:00", "attempt_number": 2, "consecutive": true},
+        {"event_type": "inactivity", "timestamp": "2025-01-15T10:00:00+08:00", "duration_hours": 6, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_075",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 3},
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0},
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.2, "inactivity_stddev_hours": 0.3}
+      },
+      "expected_routes": ["sleep-pattern-expert", "mobility-fall-expert", "dementia-behavior-expert"],
+      "expected_alert_class": ["sleep_issue", "mobility_issue", "cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Full cascade: poor sleep → morning rise difficulty → daytime withdrawal. All three domains."
+    },
+    {
+      "test_id": 76,
+      "description": "Suppression: single isolated bed exit — no trend",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:00:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_076",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5, "bed_exit_night_stddev": 0.3}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Single isolated event. No multi-day trend. Suppressed."
+    },
+    {
+      "test_id": 77,
+      "description": "Suppression: single slow walking event — no trend",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T10:00:00+08:00", "speed_m_per_s": 0.50, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_077",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04},
+        "alert_history": []
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Single-day anomaly. System requires multi-day trend (min_distinct_days: 2). Suppressed on first occurrence."
+    },
+    {
+      "test_id": 78,
+      "description": "Suppression: single nighttime wandering — isolated",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 10, "location": "hallway"}
+      ],
+      "baseline": {
+        "user_id": "user_078",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0},
+        "alert_history": []
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Single isolated nighttime wandering. No multi-day trend formed yet. Suppressed."
+    },
+    {
+      "test_id": 79,
+      "description": "Suppression: single inactivity event — no trend",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-15T10:00:00+08:00", "duration_hours": 4.5, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_079",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.5, "inactivity_stddev_hours": 0.4},
+        "alert_history": []
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Single day inactivity above threshold. Single-event anomaly suppressed — need multi-day trend."
+    },
+    {
+      "test_id": 80,
+      "description": "Suppression: single appliance anomaly — isolated event",
+      "input_events": [
+        {"event_type": "appliance_interaction", "timestamp": "2025-01-15T12:00:00+08:00", "appliance": "stove", "duration_minutes": 25, "classification": "anomalous"}
+      ],
+      "baseline": {
+        "user_id": "user_080",
+        "learning_complete": true,
+        "activity_metrics": {"appliance_interaction_avg_duration_minutes": 8, "appliance_interaction_stddev_minutes": 3},
+        "alert_history": []
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Single appliance anomaly. No multi-day trend. Suppressed."
+    },
+    {
+      "test_id": 81,
+      "description": "Suppression: sleep alert sent 24h ago, no worsening — duplicate suppression",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:30:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_081",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5, "bed_exit_night_stddev": 0.2},
+        "alert_history": [
+          {"class": "sleep_issue", "timestamp": "2025-01-14T08:00:00+08:00", "severity": "moderate"}
+        ]
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Same class alert sent within 48h lookback window and not worse. Suppressed to prevent alert fatigue."
+    },
+    {
+      "test_id": 82,
+      "description": "Suppression: mobility alert 36h ago, same severity — suppress",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T10:00:00+08:00", "speed_m_per_s": 0.52, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_082",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04},
+        "alert_history": [
+          {"class": "mobility_issue", "timestamp": "2025-01-13T22:00:00+08:00", "severity": "moderate", "speed_reported": 0.52}
+        ]
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Mobility alert sent 36h ago with same severity. Within 48h window, not worse. Suppressed."
+    },
+    {
+      "test_id": 83,
+      "description": "Suppression: cognitive alert 40h ago, same pattern — suppress",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 15, "location": "hallway"}
+      ],
+      "baseline": {
+        "user_id": "user_083",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0},
+        "alert_history": [
+          {"class": "cognitive_issue", "timestamp": "2025-01-13T10:00:00+08:00", "severity": "moderate"}
+        ]
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Cognitive alert sent 40h ago. Within 48h window and not escalating. Suppressed."
+    },
+    {
+      "test_id": 84,
+      "description": "Suppression: sleep alert 20h ago, not worse — suppress",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 35}
+      ],
+      "baseline": {
+        "user_id": "user_084",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 3},
+        "alert_history": [
+          {"class": "sleep_issue", "timestamp": "2025-01-14T06:00:00+08:00", "severity": "moderate", "tossing_reported": 38}
+        ]
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Sleep alert sent 20h ago. Current tossing (35 min) not worse than prior (38 min). Suppressed."
+    },
+    {
+      "test_id": 85,
+      "description": "Suppression: mobility alert 10h ago, same level — suppress",
+      "input_events": [
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:00:00+08:00", "attempt_number": 1, "consecutive": true},
+        {"event_type": "rise_attempt_fail", "timestamp": "2025-01-15T07:03:00+08:00", "attempt_number": 2, "consecutive": true}
+      ],
+      "baseline": {
+        "user_id": "user_085",
+        "learning_complete": true,
+        "mobility_metrics": {"rise_attempt_fail_avg": 0.0},
+        "alert_history": [
+          {"class": "mobility_issue", "timestamp": "2025-01-14T21:00:00+08:00", "severity": "moderate", "rise_fails_reported": 2}
+        ]
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Same severity mobility alert within 48h. 2 failures same as before. Suppressed."
+    },
+    {
+      "test_id": 86,
+      "description": "Not suppressed: multi-day trend forms after initial suppression",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-14T02:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-14T04:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:30:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T03:45:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T05:00:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_086",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.4, "bed_exit_night_stddev": 0.2},
+        "alert_history": []
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Multi-day trend established (2+ distinct days). First-time alert for this pattern. Should route."
+    },
+    {
+      "test_id": 87,
+      "description": "Not suppressed: worsening trend despite prior alert",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-14T10:00:00+08:00", "speed_m_per_s": 0.48, "classification": "anomalous_slow"},
+        {"event_type": "walking", "timestamp": "2025-01-15T09:00:00+08:00", "speed_m_per_s": 0.40, "classification": "anomalous_slow"}
+      ],
+      "baseline": {
+        "user_id": "user_087",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80, "walking_speed_stddev": 0.04},
+        "alert_history": [
+          {"class": "mobility_issue", "timestamp": "2025-01-13T12:00:00+08:00", "severity": "moderate", "speed_reported": 0.52}
+        ]
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["mobility_issue"],
+      "expected_suppression": false,
+      "notes": "Prior alert was at 0.52 m/s. Now 0.40 m/s — significantly worse. Worsening bypasses suppression."
+    },
+    {
+      "test_id": 88,
+      "description": "Not suppressed: prior alert > 48h ago — suppression window expired",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T01:30:00+08:00", "duration_minutes": 20, "location": "kitchen"},
+        {"event_type": "wandering", "timestamp": "2025-01-16T02:00:00+08:00", "duration_minutes": 18, "location": "hallway"}
+      ],
+      "baseline": {
+        "user_id": "user_088",
+        "learning_complete": true,
+        "activity_metrics": {"nighttime_wandering_count_avg": 0.0},
+        "alert_history": [
+          {"class": "cognitive_issue", "timestamp": "2025-01-12T10:00:00+08:00", "severity": "moderate"}
+        ]
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Prior alert was > 72h ago (Jan 12). Suppression window (48h) has expired. New trend routes."
+    },
+    {
+      "test_id": 89,
+      "description": "Not suppressed: escalating inactivity despite prior alert 30h ago",
+      "input_events": [
+        {"event_type": "inactivity", "timestamp": "2025-01-14T10:00:00+08:00", "duration_hours": 5, "period": "daytime"},
+        {"event_type": "inactivity", "timestamp": "2025-01-15T09:00:00+08:00", "duration_hours": 7, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_089",
+        "learning_complete": true,
+        "activity_metrics": {"inactivity_avg_daytime_hours": 1.5, "inactivity_stddev_hours": 0.4},
+        "alert_history": [
+          {"class": "cognitive_issue", "timestamp": "2025-01-14T14:00:00+08:00", "severity": "moderate", "inactivity_reported": 5}
+        ]
+      },
+      "expected_routes": ["dementia-behavior-expert"],
+      "expected_alert_class": ["cognitive_issue"],
+      "expected_suppression": false,
+      "notes": "Prior alert at 5 hours inactivity. Now 7 hours — worsening. Routes despite 30h window."
+    },
+    {
+      "test_id": 90,
+      "description": "Not suppressed: new multi-day tossing trend, no prior alerts",
+      "input_events": [
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-14T02:00:00+08:00", "duration_minutes": 35},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T01:30:00+08:00", "duration_minutes": 40}
+      ],
+      "baseline": {
+        "user_id": "user_090",
+        "learning_complete": true,
+        "sleep_metrics": {"tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 3},
+        "alert_history": []
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "First-time two-day trend. No prior alerts. Routes normally."
+    },
+    {
+      "test_id": 91,
+      "description": "Learning period: normal bed exits — suppress all",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T02:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T04:30:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T05:45:00+08:00", "count": 1}
+      ],
+      "baseline": {
+        "user_id": "user_091",
+        "learning_complete": false,
+        "learning_day": 3
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Day 3 of 14-day learning period. All normal events suppressed to build baseline."
+    },
+    {
+      "test_id": 92,
+      "description": "Learning period: slow gait — suppress for baseline building",
+      "input_events": [
+        {"event_type": "walking", "timestamp": "2025-01-15T10:00:00+08:00", "speed_m_per_s": 0.50, "classification": "slow"}
+      ],
+      "baseline": {
+        "user_id": "user_092",
+        "learning_complete": false,
+        "learning_day": 7
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Day 7 of learning period. Gait data is being collected for baseline. No routing yet."
+    },
+    {
+      "test_id": 93,
+      "description": "Learning period: nighttime wandering — suppress for baseline",
+      "input_events": [
+        {"event_type": "wandering", "timestamp": "2025-01-15T02:00:00+08:00", "duration_minutes": 15, "location": "hallway"},
+        {"event_type": "inactivity", "timestamp": "2025-01-15T10:00:00+08:00", "duration_hours": 4, "period": "daytime"}
+      ],
+      "baseline": {
+        "user_id": "user_093",
+        "learning_complete": false,
+        "learning_day": 10
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Day 10 of learning period. Even above-threshold events suppressed during learning."
+    },
+    {
+      "test_id": 94,
+      "description": "Learning period: sudden drop — BYPASS learning, route immediately",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T14:00:00+08:00", "posture_type": "sudden_drop", "location": "bathroom", "confidence": 0.90}
+      ],
+      "baseline": {
+        "user_id": "user_094",
+        "learning_complete": false,
+        "learning_day": 2
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: sudden_drop BYPASSES learning period. Day 2 but still routes immediately."
+    },
+    {
+      "test_id": 95,
+      "description": "Learning period: sudden drop day 12 — still bypass",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T09:30:00+08:00", "posture_type": "sudden_drop", "location": "kitchen", "confidence": 0.88}
+      ],
+      "baseline": {
+        "user_id": "user_095",
+        "learning_complete": false,
+        "learning_day": 12
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "CRITICAL: sudden_drop BYPASSES learning period. Day 12, near end of learning but still routes."
+    },
+    {
+      "test_id": 96,
+      "description": "Edge case: empty event log — no route",
+      "input_events": [],
+      "baseline": {
+        "user_id": "user_096",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5},
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.80}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Empty event log. Nothing to analyze. No route."
+    },
+    {
+      "test_id": 97,
+      "description": "Edge case: exactly 2 bed exits + exactly 30 min tossing — double boundary",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T01:00:00+08:00", "count": 1},
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T04:00:00+08:00", "count": 1},
+        {"event_type": "tossing_and_turning", "timestamp": "2025-01-15T02:30:00+08:00", "duration_minutes": 30}
+      ],
+      "baseline": {
+        "user_id": "user_097",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.4, "bed_exit_night_stddev": 0.2, "tossing_avg_duration_minutes": 10, "tossing_stddev_minutes": 3}
+      },
+      "expected_routes": ["sleep-pattern-expert"],
+      "expected_alert_class": ["sleep_issue"],
+      "expected_suppression": false,
+      "notes": "Double boundary: exactly 2 bed exits AND exactly 30 min tossing. Both meet >= thresholds."
+    },
+    {
+      "test_id": 98,
+      "description": "Edge case: unknown event type — ignore gracefully",
+      "input_events": [
+        {"event_type": "temperature_reading", "timestamp": "2025-01-15T10:00:00+08:00", "value": 36.5, "unit": "celsius"},
+        {"event_type": "humidity_sensor", "timestamp": "2025-01-15T10:00:00+08:00", "value": 65, "unit": "percent"}
+      ],
+      "baseline": {
+        "user_id": "user_098",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.3}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Unknown event types should be ignored gracefully. No error, no route."
+    },
+    {
+      "test_id": 99,
+      "description": "Edge case: event with missing fields — handle gracefully",
+      "input_events": [
+        {"event_type": "bed_exit", "timestamp": "2025-01-15T02:00:00+08:00"},
+        {"event_type": "walking", "speed_m_per_s": 0.50},
+        {"event_type": "tossing_and_turning"}
+      ],
+      "baseline": {
+        "user_id": "user_099",
+        "learning_complete": true,
+        "sleep_metrics": {"bed_exit_night_avg": 0.5}
+      },
+      "expected_routes": [],
+      "expected_alert_class": [],
+      "expected_suppression": true,
+      "notes": "Events with missing required fields (count, timestamp, duration). System should handle gracefully without crashing."
+    },
+    {
+      "test_id": 100,
+      "description": "Edge case: multiple sudden drops in same period — single immediate route",
+      "input_events": [
+        {"event_type": "posture_change", "timestamp": "2025-01-15T14:00:00+08:00", "posture_type": "sudden_drop", "location": "living_room", "confidence": 0.92},
+        {"event_type": "posture_change", "timestamp": "2025-01-15T14:05:00+08:00", "posture_type": "sudden_drop", "location": "living_room", "confidence": 0.85},
+        {"event_type": "posture_change", "timestamp": "2025-01-15T14:10:00+08:00", "posture_type": "sudden_drop", "location": "hallway", "confidence": 0.88}
+      ],
+      "baseline": {
+        "user_id": "user_100",
+        "learning_complete": true,
+        "mobility_metrics": {"walking_speed_baseline_normal": 0.75}
+      },
+      "expected_routes": ["mobility-fall-expert"],
+      "expected_alert_class": ["URGENT_FALL_RISK"],
+      "expected_suppression": false,
+      "notes": "Multiple sudden drops in 10 minutes. Should consolidate into single immediate route to avoid duplicate alerts."
+    }
+  ]
+}
