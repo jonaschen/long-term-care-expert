@@ -1,5 +1,6 @@
 .venv/
 knowledge_base/vector_index/
+knowledge_base/raw_documents/
 memory/user_baselines/
 __pycache__/
 *.pyc
