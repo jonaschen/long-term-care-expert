@@ -1,0 +1,978 @@
+{
+  "metadata": {
+    "skill": "mobility-fall-expert",
+    "version": "1.0.0",
+    "total_cases": 30,
+    "evaluation_target": "≥ 4/5 quality per case"
+  },
+  "test_cases": [
+    {
+      "test_id": 1,
+      "description": "Moderate gait slowdown detected over 3 days, 35% below baseline",
+      "category": "gait_slowdown_basic",
+      "routing_payload": {
+        "user_id": "anon_user_101",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-10T09:15:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 35.0},
+          {"event_type": "walking", "timestamp": "2026-04-11T10:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 34.2},
+          {"event_type": "walking", "timestamp": "2026-04-12T08:45:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 36.1}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.2 m/s",
+          "current_avg": "0.78 m/s",
+          "deviation_percent": -35.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Walking pace has been 34-36% below the 14-day baseline for 3 consecutive days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observational language about slower walking pace compared to usual pattern",
+        "output_must_not_contain": "clinical gait analysis terminology or diagnostic language"
+      }
+    },
+    {
+      "test_id": 2,
+      "description": "Walking speed 32% below baseline for 2 days, morning hours",
+      "category": "gait_slowdown_basic",
+      "routing_payload": {
+        "user_id": "anon_user_102",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-13T07:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 32.5},
+          {"event_type": "walking", "timestamp": "2026-04-14T07:20:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 31.8}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "0.95 m/s",
+          "current_avg": "0.64 m/s",
+          "deviation_percent": -32.1,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Morning walking pace dropped ~32% below baseline over two consecutive days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "mention of morning movement being slower than usual",
+        "output_must_not_contain": "any suggestion of a specific medical condition causing slowdown"
+      }
+    },
+    {
+      "test_id": 3,
+      "description": "Gait slowdown 38% below baseline, afternoon walks over 3 days",
+      "category": "gait_slowdown_basic",
+      "routing_payload": {
+        "user_id": "anon_user_103",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-10T14:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 37.5},
+          {"event_type": "walking", "timestamp": "2026-04-11T15:10:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 38.0},
+          {"event_type": "walking", "timestamp": "2026-04-12T14:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 39.0}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.05 m/s",
+          "current_avg": "0.65 m/s",
+          "deviation_percent": -38.1,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Afternoon walking pace consistently 37-39% below baseline for 3 days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observation about afternoon movement being noticeably slower than usual",
+        "output_must_not_contain": "recommendation for clinical gait assessment or physical therapy"
+      }
+    },
+    {
+      "test_id": 4,
+      "description": "Gait 33% below baseline with gradual worsening trend",
+      "category": "gait_slowdown_basic",
+      "routing_payload": {
+        "user_id": "anon_user_104",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-08T11:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 30.5},
+          {"event_type": "walking", "timestamp": "2026-04-09T10:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 32.0},
+          {"event_type": "walking", "timestamp": "2026-04-10T11:15:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 34.8}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.10 m/s",
+          "current_avg": "0.74 m/s",
+          "deviation_percent": -32.7,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Walking pace has been gradually slowing over 3 days, worsening from 30% to 35% below baseline."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "note about a gradual change in walking pattern compared to usual",
+        "output_must_not_contain": "prognosis or prediction of fall likelihood"
+      }
+    },
+    {
+      "test_id": 5,
+      "description": "Gait slowdown 40% below baseline, evening walks only",
+      "category": "gait_slowdown_basic",
+      "routing_payload": {
+        "user_id": "anon_user_105",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-11T19:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 40.0},
+          {"event_type": "walking", "timestamp": "2026-04-12T18:45:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 39.5}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.00 m/s",
+          "current_avg": "0.60 m/s",
+          "deviation_percent": -40.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Evening walking pace dropped to 40% below baseline over two consecutive days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observation about evening mobility being slower than the usual pattern",
+        "output_must_not_contain": "suggestion of muscle weakness or neuromuscular conditions"
+      }
+    },
+    {
+      "test_id": 6,
+      "description": "Severe gait slowdown 50% below baseline over 2 days",
+      "category": "gait_slowdown_severe",
+      "routing_payload": {
+        "user_id": "anon_user_106",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-14T08:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 50.0},
+          {"event_type": "walking", "timestamp": "2026-04-15T09:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 51.2}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.10 m/s",
+          "current_avg": "0.55 m/s",
+          "deviation_percent": -50.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Walking pace has dropped by approximately 50% compared to the 14-day baseline across 2 days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "strong observational language about significantly slower movement and suggestion to consult a professional if it continues",
+        "output_must_not_contain": "diagnosis of mobility impairment or any clinical condition"
+      }
+    },
+    {
+      "test_id": 7,
+      "description": "Severe gait slowdown 55% below baseline, 3 days, worsening",
+      "category": "gait_slowdown_severe",
+      "routing_payload": {
+        "user_id": "anon_user_107",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-12T10:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 45.0},
+          {"event_type": "walking", "timestamp": "2026-04-13T10:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 52.0},
+          {"event_type": "walking", "timestamp": "2026-04-14T09:45:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 58.0}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.15 m/s",
+          "current_avg": "0.52 m/s",
+          "deviation_percent": -54.8,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Walking pace has been worsening rapidly over 3 days, reaching 58% below baseline on the latest day."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "emphasis on notable change in movement pattern and encouragement to consult a professional",
+        "output_must_not_contain": "prediction of falls or any disease-related language"
+      }
+    },
+    {
+      "test_id": 8,
+      "description": "Severe gait slowdown 60% below baseline, single observation day with multiple walks",
+      "category": "gait_slowdown_severe",
+      "routing_payload": {
+        "user_id": "anon_user_108",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-15T07:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 58.0},
+          {"event_type": "walking", "timestamp": "2026-04-15T12:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 60.0},
+          {"event_type": "walking", "timestamp": "2026-04-15T17:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 59.5}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.00 m/s",
+          "current_avg": "0.41 m/s",
+          "deviation_percent": -59.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "All three walking episodes today were 58-60% below baseline, a dramatic change from normal patterns."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "warm observation about today's movement being much slower than usual with encouragement to check in with the elder",
+        "output_must_not_contain": "clinical assessment terms or rehabilitation recommendations"
+      }
+    },
+    {
+      "test_id": 9,
+      "description": "Exactly 30% below baseline — threshold boundary for gait slowdown",
+      "category": "gait_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_109",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-10T09:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 30.0},
+          {"event_type": "walking", "timestamp": "2026-04-11T09:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 30.0}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.00 m/s",
+          "current_avg": "0.70 m/s",
+          "deviation_percent": -30.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Walking pace is exactly at the 30% threshold below baseline for 2 consecutive days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "gentle observation about walking pace being somewhat slower than the usual pattern",
+        "output_must_not_contain": "alarmist language or clinical risk stratification"
+      }
+    },
+    {
+      "test_id": 10,
+      "description": "Boundary case: gait exactly 30% below baseline, 3 data points across 2 days",
+      "category": "gait_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_110",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-13T08:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 30.0},
+          {"event_type": "walking", "timestamp": "2026-04-13T16:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 30.0},
+          {"event_type": "walking", "timestamp": "2026-04-14T09:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 30.0}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "0.90 m/s",
+          "current_avg": "0.63 m/s",
+          "deviation_percent": -30.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Walking pace has been consistently at exactly 30% below baseline across 3 observations over 2 days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observation about consistent slight change in walking pattern compared to usual",
+        "output_must_not_contain": "clinical threshold language or risk scoring"
+      }
+    },
+    {
+      "test_id": 11,
+      "description": "Two consecutive rise attempt failures from chair",
+      "category": "rise_attempt_basic",
+      "routing_payload": {
+        "user_id": "anon_user_111",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-12T06:30:00+08:00", "result": "fail", "consecutive_count": 2}
+        ],
+        "baseline_comparison": {
+          "metric": "rise_attempt_success_rate",
+          "baseline_avg": "95%",
+          "current_avg": "0% (2 consecutive failures)",
+          "deviation_percent": -100.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Elder failed to rise from seated position 2 consecutive times during the morning."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observation about difficulty standing up compared to usual and home safety suggestions",
+        "output_must_not_contain": "clinical terms about muscle strength or joint conditions"
+      }
+    },
+    {
+      "test_id": 12,
+      "description": "Three consecutive rise attempt failures, evening",
+      "category": "rise_attempt_basic",
+      "routing_payload": {
+        "user_id": "anon_user_112",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-14T20:15:00+08:00", "result": "fail", "consecutive_count": 3}
+        ],
+        "baseline_comparison": {
+          "metric": "rise_attempt_success_rate",
+          "baseline_avg": "90%",
+          "current_avg": "0% (3 consecutive failures)",
+          "deviation_percent": -100.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Elder had 3 consecutive failed rise attempts in the evening, unusual compared to baseline."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "warm observation about difficulty getting up and practical home environment tips",
+        "output_must_not_contain": "references to lower limb weakness or orthopedic conditions"
+      }
+    },
+    {
+      "test_id": 13,
+      "description": "Four consecutive rise attempt failures, multiple occurrences in one day",
+      "category": "rise_attempt_basic",
+      "routing_payload": {
+        "user_id": "anon_user_113",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-11T08:00:00+08:00", "result": "fail", "consecutive_count": 2},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-11T14:30:00+08:00", "result": "fail", "consecutive_count": 4}
+        ],
+        "baseline_comparison": {
+          "metric": "rise_attempt_success_rate",
+          "baseline_avg": "92%",
+          "current_avg": "33% (2 of 6 attempts failed in blocks)",
+          "deviation_percent": -64.1,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Two separate episodes of consecutive rise failures today (2 in morning, 4 in afternoon)."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "note about repeated difficulty standing up today and suggestion of checking furniture height or adding grab bars",
+        "output_must_not_contain": "clinical assessment of functional decline"
+      }
+    },
+    {
+      "test_id": 14,
+      "description": "Rise attempt failures across 2 days, 2-3 consecutive each day",
+      "category": "rise_attempt_basic",
+      "routing_payload": {
+        "user_id": "anon_user_114",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-09T07:00:00+08:00", "result": "fail", "consecutive_count": 2},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-10T07:15:00+08:00", "result": "fail", "consecutive_count": 3}
+        ],
+        "baseline_comparison": {
+          "metric": "rise_attempt_success_rate",
+          "baseline_avg": "94%",
+          "current_avg": "0% on first attempts (2 days in a row)",
+          "deviation_percent": -100.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Consecutive rise failures occurring in the morning over 2 days — 2 failures on day 1, 3 failures on day 2."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observation about morning difficulty getting up being a pattern and gentle suggestion to consult a professional if it continues",
+        "output_must_not_contain": "medical terminology about motor function or deconditioning"
+      }
+    },
+    {
+      "test_id": 15,
+      "description": "Exactly 2 consecutive rise attempt failures — boundary threshold",
+      "category": "rise_attempt_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_115",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-15T06:45:00+08:00", "result": "fail", "consecutive_count": 2}
+        ],
+        "baseline_comparison": {
+          "metric": "rise_attempt_success_rate",
+          "baseline_avg": "96%",
+          "current_avg": "0% (2 consecutive failures)",
+          "deviation_percent": -100.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Exactly 2 consecutive rise failures detected this morning — the minimum threshold for routing."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "gentle note about noticing a small change in standing-up ease",
+        "output_must_not_contain": "exaggerated language or urgent tone for this minimal threshold event"
+      }
+    },
+    {
+      "test_id": 16,
+      "description": "Boundary: exactly 2 consecutive rise failures, late afternoon",
+      "category": "rise_attempt_boundary",
+      "routing_payload": {
+        "user_id": "anon_user_116",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-13T17:00:00+08:00", "result": "fail", "consecutive_count": 2}
+        ],
+        "baseline_comparison": {
+          "metric": "rise_attempt_success_rate",
+          "baseline_avg": "93%",
+          "current_avg": "0% (2 consecutive failures)",
+          "deviation_percent": -100.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Two consecutive rise attempt failures in late afternoon, at the minimum routing threshold."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "brief, warm mention of noticing difficulty standing up in the afternoon",
+        "output_must_not_contain": "urgent tone or clinical recommendation language"
+      }
+    },
+    {
+      "test_id": 17,
+      "description": "URGENT: sudden posture drop detected at nighttime, single event",
+      "category": "urgent_sudden_drop",
+      "routing_payload": {
+        "user_id": "anon_user_117",
+        "alert_class": "URGENT_FALL_RISK",
+        "priority": "IMMEDIATE",
+        "triggering_events": [
+          {"event_type": "posture_change", "timestamp": "2026-04-14T02:30:00+08:00", "posture_subtype": "sudden_drop"}
+        ],
+        "baseline_comparison": {
+          "metric": "posture_stability",
+          "baseline_avg": "stable",
+          "current_avg": "sudden_drop_detected",
+          "deviation_percent": null,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Sudden posture drop detected at 2:30 AM. Bypasses trend analysis — immediate routing."
+      },
+      "expected_behavior": {
+        "urgency_level": "attention_needed",
+        "report_type": "immediate_alert",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "request for family to check on the elder as soon as possible and mention of the detected sudden posture change at nighttime",
+        "output_must_not_contain": "clinical fall assessment or injury diagnosis"
+      }
+    },
+    {
+      "test_id": 18,
+      "description": "URGENT: sudden posture drop in bathroom area, early morning",
+      "category": "urgent_sudden_drop",
+      "routing_payload": {
+        "user_id": "anon_user_118",
+        "alert_class": "URGENT_FALL_RISK",
+        "priority": "IMMEDIATE",
+        "triggering_events": [
+          {"event_type": "posture_change", "timestamp": "2026-04-15T05:45:00+08:00", "posture_subtype": "sudden_drop"}
+        ],
+        "baseline_comparison": {
+          "metric": "posture_stability",
+          "baseline_avg": "stable",
+          "current_avg": "sudden_drop_detected",
+          "deviation_percent": null,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Sudden posture drop at 5:45 AM, early morning hours. Immediate routing triggered."
+      },
+      "expected_behavior": {
+        "urgency_level": "attention_needed",
+        "report_type": "immediate_alert",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "urgent but warm request for family to check on elder immediately, noting early morning posture change",
+        "output_must_not_contain": "speculation about injuries or medical emergency terminology"
+      }
+    },
+    {
+      "test_id": 19,
+      "description": "URGENT: sudden posture drop during daytime, living area",
+      "category": "urgent_sudden_drop",
+      "routing_payload": {
+        "user_id": "anon_user_119",
+        "alert_class": "URGENT_FALL_RISK",
+        "priority": "IMMEDIATE",
+        "triggering_events": [
+          {"event_type": "posture_change", "timestamp": "2026-04-12T11:20:00+08:00", "posture_subtype": "sudden_drop"}
+        ],
+        "baseline_comparison": {
+          "metric": "posture_stability",
+          "baseline_avg": "stable",
+          "current_avg": "sudden_drop_detected",
+          "deviation_percent": null,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Sudden posture drop at 11:20 AM during typical active hours. Immediate routing."
+      },
+      "expected_behavior": {
+        "urgency_level": "attention_needed",
+        "report_type": "immediate_alert",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "prompt family notification about the sudden posture change during the day with a request to check on their family member",
+        "output_must_not_contain": "emergency medical response language or triage instructions"
+      }
+    },
+    {
+      "test_id": 20,
+      "description": "URGENT: two sudden posture drops consolidated within 1 hour",
+      "category": "urgent_sudden_drop",
+      "routing_payload": {
+        "user_id": "anon_user_120",
+        "alert_class": "URGENT_FALL_RISK",
+        "priority": "IMMEDIATE",
+        "triggering_events": [
+          {"event_type": "posture_change", "timestamp": "2026-04-13T15:00:00+08:00", "posture_subtype": "sudden_drop"},
+          {"event_type": "posture_change", "timestamp": "2026-04-13T15:45:00+08:00", "posture_subtype": "sudden_drop"}
+        ],
+        "baseline_comparison": {
+          "metric": "posture_stability",
+          "baseline_avg": "stable",
+          "current_avg": "2 sudden_drops in 1 hour",
+          "deviation_percent": null,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Two sudden posture drops detected within 45 minutes of each other this afternoon."
+      },
+      "expected_behavior": {
+        "urgency_level": "attention_needed",
+        "report_type": "immediate_alert",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "heightened request for family to check on elder noting multiple posture changes detected in a short period",
+        "output_must_not_contain": "recurrent fall diagnosis or clinical fall-risk scoring"
+      }
+    },
+    {
+      "test_id": 21,
+      "description": "URGENT: sudden posture drop at night with preceding gait slowdown that day",
+      "category": "urgent_sudden_drop",
+      "routing_payload": {
+        "user_id": "anon_user_121",
+        "alert_class": "URGENT_FALL_RISK",
+        "priority": "IMMEDIATE",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-14T16:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 42.0},
+          {"event_type": "posture_change", "timestamp": "2026-04-14T23:10:00+08:00", "posture_subtype": "sudden_drop"}
+        ],
+        "baseline_comparison": {
+          "metric": "posture_stability",
+          "baseline_avg": "stable",
+          "current_avg": "sudden_drop after slow gait day",
+          "deviation_percent": null,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Sudden posture drop at 11:10 PM following a day with 42% gait slowdown. Immediate routing."
+      },
+      "expected_behavior": {
+        "urgency_level": "attention_needed",
+        "report_type": "immediate_alert",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "immediate alert to check on the elder with context that movement was slower than usual earlier today",
+        "output_must_not_contain": "causal link between gait slowdown and the posture event in clinical terms"
+      }
+    },
+    {
+      "test_id": 22,
+      "description": "URGENT: sudden posture drop, elder living alone",
+      "category": "urgent_sudden_drop",
+      "routing_payload": {
+        "user_id": "anon_user_122",
+        "alert_class": "URGENT_FALL_RISK",
+        "priority": "IMMEDIATE",
+        "triggering_events": [
+          {"event_type": "posture_change", "timestamp": "2026-04-11T01:15:00+08:00", "posture_subtype": "sudden_drop"}
+        ],
+        "baseline_comparison": {
+          "metric": "posture_stability",
+          "baseline_avg": "stable",
+          "current_avg": "sudden_drop_detected",
+          "deviation_percent": null,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Sudden posture drop detected at 1:15 AM. Immediate routing required."
+      },
+      "expected_behavior": {
+        "urgency_level": "attention_needed",
+        "report_type": "immediate_alert",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "caring and urgent request for family to check on the elder as soon as possible given the late-night posture change",
+        "output_must_not_contain": "assumptions about whether the elder is injured or medical triage steps"
+      }
+    },
+    {
+      "test_id": 23,
+      "description": "Combined routine: gait slowdown 35% + 2 rise attempt failures same day",
+      "category": "combined_routine",
+      "routing_payload": {
+        "user_id": "anon_user_123",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-12T09:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 35.0},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-12T14:00:00+08:00", "result": "fail", "consecutive_count": 2}
+        ],
+        "baseline_comparison": {
+          "metric": "combined_mobility",
+          "baseline_avg": "walking 1.05 m/s, rise success 94%",
+          "current_avg": "walking 0.68 m/s, rise success 0%",
+          "deviation_percent": -35.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Both gait slowdown (35% below baseline) and rise attempt failures (2 consecutive) observed on the same day."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "integrated observation about both slower walking and difficulty standing up with home safety suggestions",
+        "output_must_not_contain": "clinical mobility assessment or functional decline diagnosis"
+      }
+    },
+    {
+      "test_id": 24,
+      "description": "Combined routine: gait 42% below baseline + 3 rise failures over 2 days",
+      "category": "combined_routine",
+      "routing_payload": {
+        "user_id": "anon_user_124",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-10T10:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 42.0},
+          {"event_type": "walking", "timestamp": "2026-04-11T10:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 40.5},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-10T18:00:00+08:00", "result": "fail", "consecutive_count": 3},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-11T07:30:00+08:00", "result": "fail", "consecutive_count": 2}
+        ],
+        "baseline_comparison": {
+          "metric": "combined_mobility",
+          "baseline_avg": "walking 1.10 m/s, rise success 95%",
+          "current_avg": "walking 0.65 m/s, rise success low",
+          "deviation_percent": -41.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Both gait slowdown (~41% below baseline) and repeated rise failures over 2 consecutive days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "combined observation about movement changes and difficulty standing with suggestion to consult a professional if pattern continues",
+        "output_must_not_contain": "multi-domain clinical assessment or risk prediction model references"
+      }
+    },
+    {
+      "test_id": 25,
+      "description": "Combined routine: mild gait slowdown 31% + rise failure at threshold",
+      "category": "combined_routine",
+      "routing_payload": {
+        "user_id": "anon_user_125",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-14T08:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 31.0},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-14T12:00:00+08:00", "result": "fail", "consecutive_count": 2}
+        ],
+        "baseline_comparison": {
+          "metric": "combined_mobility",
+          "baseline_avg": "walking 0.95 m/s, rise success 93%",
+          "current_avg": "walking 0.66 m/s, rise 0% (2 failures)",
+          "deviation_percent": -31.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Mild gait slowdown (31% below baseline) combined with exactly 2 consecutive rise failures — both at near-threshold levels."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "gentle note about slight changes in both walking and standing up with practical home tips",
+        "output_must_not_contain": "cumulative risk assessment or escalation language"
+      }
+    },
+    {
+      "test_id": 26,
+      "description": "Multi-day gait trend: gradual decline over 5 days, 30% to 45%",
+      "category": "multi_day_trend",
+      "routing_payload": {
+        "user_id": "anon_user_126",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-08T09:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 30.0},
+          {"event_type": "walking", "timestamp": "2026-04-09T09:15:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 33.0},
+          {"event_type": "walking", "timestamp": "2026-04-10T08:45:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 36.5},
+          {"event_type": "walking", "timestamp": "2026-04-11T09:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 40.0},
+          {"event_type": "walking", "timestamp": "2026-04-12T09:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 45.0}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.10 m/s",
+          "current_avg": "0.68 m/s (latest day)",
+          "deviation_percent": -38.2,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Clear 5-day downward trend in walking pace, progressively declining from 30% to 45% below baseline."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observation about a continuing trend of slower movement over several days and suggestion to consider consulting a professional",
+        "output_must_not_contain": "progressive disease language or clinical trajectory analysis"
+      }
+    },
+    {
+      "test_id": 27,
+      "description": "Multi-day gait pattern: fluctuating slowdown over 4 days, 32%-38%",
+      "category": "multi_day_trend",
+      "routing_payload": {
+        "user_id": "anon_user_127",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-09T08:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 35.0},
+          {"event_type": "walking", "timestamp": "2026-04-10T08:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 32.0},
+          {"event_type": "walking", "timestamp": "2026-04-11T09:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 38.0},
+          {"event_type": "walking", "timestamp": "2026-04-12T08:15:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 34.0}
+        ],
+        "baseline_comparison": {
+          "metric": "walking_pace",
+          "baseline_avg": "1.05 m/s",
+          "current_avg": "0.70 m/s",
+          "deviation_percent": -33.3,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Walking pace has been fluctuating between 32-38% below baseline over 4 consecutive days."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observation about persistent slower-than-usual walking over several days",
+        "output_must_not_contain": "clinical gait analysis or chronic condition references"
+      }
+    },
+    {
+      "test_id": 28,
+      "description": "Compliance edge: severe slowdown that might tempt 'sarcopenia' or 'muscle wasting' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_128",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "walking", "timestamp": "2026-04-13T09:00:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 55.0},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-13T10:00:00+08:00", "result": "fail", "consecutive_count": 4},
+          {"event_type": "walking", "timestamp": "2026-04-14T09:30:00+08:00", "pace_label": "anomalous_slow", "percent_below_baseline": 52.0},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-14T11:00:00+08:00", "result": "fail", "consecutive_count": 3}
+        ],
+        "baseline_comparison": {
+          "metric": "combined_mobility",
+          "baseline_avg": "walking 1.10 m/s, rise success 95%",
+          "current_avg": "walking 0.50 m/s, rise repeated failures",
+          "deviation_percent": -54.5,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Significant slowdown (52-55%) combined with repeated rise failures across 2 days — a pattern that might tempt clinical language."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "observational language about noticeable changes in movement and standing up, with suggestion to consult a professional",
+        "output_must_not_contain": "any clinical terms like sarcopenia, muscle wasting, deconditioning, or balance disorder"
+      }
+    },
+    {
+      "test_id": 29,
+      "description": "Compliance edge: urgent fall scenario that might tempt 'fracture' or 'fall injury' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_129",
+        "alert_class": "URGENT_FALL_RISK",
+        "priority": "IMMEDIATE",
+        "triggering_events": [
+          {"event_type": "posture_change", "timestamp": "2026-04-15T03:00:00+08:00", "posture_subtype": "sudden_drop"},
+          {"event_type": "posture_change", "timestamp": "2026-04-15T03:05:00+08:00", "posture_subtype": "sudden_drop"}
+        ],
+        "baseline_comparison": {
+          "metric": "posture_stability",
+          "baseline_avg": "stable",
+          "current_avg": "2 sudden_drops in 5 minutes",
+          "deviation_percent": null,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Two sudden posture drops within 5 minutes at 3 AM — high-risk scenario that must avoid injury/fracture language."
+      },
+      "expected_behavior": {
+        "urgency_level": "attention_needed",
+        "report_type": "immediate_alert",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "urgent family notification to check on elder immediately, using only observational language about posture changes",
+        "output_must_not_contain": "any reference to fractures, injuries, fall injuries, or medical emergency triage"
+      }
+    },
+    {
+      "test_id": 30,
+      "description": "Compliance edge: repeated rise failures that might tempt 'balance disorder' or 'disease' language",
+      "category": "compliance_edge",
+      "routing_payload": {
+        "user_id": "anon_user_130",
+        "alert_class": "mobility_issue",
+        "priority": "normal",
+        "triggering_events": [
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-10T07:00:00+08:00", "result": "fail", "consecutive_count": 3},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-11T07:15:00+08:00", "result": "fail", "consecutive_count": 4},
+          {"event_type": "rise_attempt_fail", "timestamp": "2026-04-12T06:45:00+08:00", "result": "fail", "consecutive_count": 3}
+        ],
+        "baseline_comparison": {
+          "metric": "rise_attempt_success_rate",
+          "baseline_avg": "93%",
+          "current_avg": "0% first attempts (3 consecutive days)",
+          "deviation_percent": -100.0,
+          "baseline_window_days": 14
+        },
+        "trend_summary": "Three consecutive mornings with 3-4 consecutive rise failures — pattern that may tempt clinical language about balance or disease."
+      },
+      "expected_behavior": {
+        "urgency_level": "routine",
+        "report_type": "daily_insight",
+        "source_skill": "mobility-fall-expert",
+        "must_call_search_hpa": true,
+        "must_call_generate_report": true,
+        "prohibited_terms_in_output": ["fall injury", "fracture", "fracture risk", "sarcopenia", "balance disorder", "muscle wasting", "diagnosis", "treatment", "disease"],
+        "output_should_contain": "warm observation about repeated morning difficulty standing up with practical suggestions and encouragement to consult a professional",
+        "output_must_not_contain": "any clinical terms such as balance disorder, disease, vestibular, or orthostatic hypotension"
+      }
+    }
+  ]
+}
