@@ -4,19 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Phase 1 in-progress project** for building `long-term-care-expert`, a hierarchical two-layer Claude Agent Skill Set for elderly home care monitoring in Taiwan.
+This is a **Phase 2 project nearing completion** for building `long-term-care-expert`, a hierarchical two-layer Claude Agent Skill Set for elderly home care monitoring in Taiwan.
 
 Two specification documents must be read before writing any code:
 - `LONGTERM_CARE_EXPERT_DEV_PLAN.md` — core system architecture, all five L2 Skills, three MCP tools, SaMD compliance rules, Phases 1–4
 - `LONG_TERM_CARE_EXT_PLAN.md` — Japan calibration layer extension: new `east-asian-health-context-expert` Skill, `search_japan_clinical_data` tool, four Japanese RAG categories, enrichments to three existing Skills, Phases 5–6
 
-**Current state:** Phase 1 baseline system design is complete (per-user baseline schema, 14-day silent learning period logic, and `baseline_manager.py` implemented). All 9 HPA/AD-8 source PDFs downloaded. 177 chunks extracted and compliance-verified across all 5 categories. Qdrant `hpa_knowledge` collection currently holds 149 points — **re-index required** (`.venv/bin/python3 tools/embedding_pipeline.py --reset`) to pick up 28 new `general_aging` chunks. `search_hpa_guidelines` tool built and tested. 30-query RAG evaluation script ready — awaiting manual scoring. Phase 2 is in progress: all L1/L2 SKILL.md files written, FastMCP server built with 3 tools (`search_hpa_guidelines`, `generate_line_report`, `check_alert_history`), compliance files created (`blacklist_terms.json`, `whitelist_terms.json`, `disclaimer_template.md`), 100-case routing accuracy test suite built, 50-case adversarial test suite built. Still pending: Qdrant re-index, RAG eval scoring, L2 reference docs, running L1 agent validation.
+**Current state:** Phase 1 complete. Phase 2 substantially complete. All L1/L2 SKILL.md files written. FastMCP server built with 3 MCP tools. All L2 reference docs and utility scripts created. Compliance files complete. 100-case routing test suite and 50-case adversarial test suite built. Knowledge base: 177 chunks indexed in Qdrant (177/177 points). RAG evaluation complete — **4.87/5 overall** (all 5 categories ≥ 4/5). **Remaining Phase 2 blockers:** (1) L1 routing validation against 100-case test suite, (2) automated blacklist scanner for generated outputs, (3) 30-case quality eval per L2 Skill.
 
 ## Knowledge Base — Current State
 
 `knowledge_base/raw_documents/` contains all 9 real PDFs (HPA handbooks + AD-8 scale).
 
-`knowledge_base/processed_chunks/` contains **177 compliant chunks** — 18 original stubs/summaries + 159 section-level chunks from `expand_chunks.py`. All pass the blacklist compliance scan (0 violations, 0 `.REVIEW` files). Further expansion toward ≥ 500 is a stretch goal; the 30-query RAG evaluation will determine if additional chunks are needed.
+`knowledge_base/processed_chunks/` contains **177 compliant chunks** — 18 original stubs/summaries + 159 section-level chunks from `expand_chunks.py`. All pass the blacklist compliance scan (0 violations, 0 `.REVIEW` files). RAG evaluation scored **4.87/5 overall** — further chunk expansion is not needed at this stage.
 
 **Chunk counts by category:**
 
@@ -88,12 +88,21 @@ Qdrant (local file: knowledge_base/vector_index/)
 
 **Python environment:** A venv exists at `.venv/`. Always use it for `tools/` and `tests/rag_eval/`. System Python is externally managed (cannot `pip install` without venv).
 
+**RAG evaluation results** (2026-03-19): `tests/rag_eval/results_2026-03-19.md`
+
+| Category | Score |
+|---|---|
+| fall_prevention | 5.00/5 |
+| sleep_hygiene | 4.67/5 |
+| dementia_care | 4.83/5 |
+| chronic_disease_lifestyle | 5.00/5 |
+| general_aging | 4.83/5 |
+| **Overall** | **4.87/5** ✅ |
+
 **Pending work (for contributors):**
-1. Re-index Qdrant: `.venv/bin/python3 tools/embedding_pipeline.py --reset` — picks up 28 new `general_aging` chunks (177 total → all indexed)
-2. Run and manually score the 30-query RAG eval: `.venv/bin/python3 tests/rag_eval/run_rag_eval.py` → score `tests/rag_eval/results_*.md` (target ≥ 4/5)
-3. Build L2 reference docs (e.g., `sleep_pattern_analyzer.py`, `gait_anomaly_detector.py`)
-4. Validate L1 routing against 100-case test suite (requires running L1 agent)
-5. Build automated blacklist scanner for generated test outputs
+1. Validate L1 routing against 100-case test suite — run L1 agent against `tests/routing_accuracy/test_cases_100.json`, target ≥ 95% accuracy
+2. Build automated blacklist scanner for generated test outputs (scans `generate_line_report` outputs for prohibited terms)
+3. Run 30 manually evaluated report generation cases per L2 Skill (target ≥ 4/5 quality)
 
 ## Two-Pillar Knowledge Architecture
 
